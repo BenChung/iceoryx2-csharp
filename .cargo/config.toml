@@ -1,0 +1,14 @@
+# `--cfg configuration_override` injects platform/iceoryx2_settings.rs into
+# iceoryx2-pal-configuration, replacing its hardcoded `C:\Temp` Windows paths.
+# Cargo merges this file into builds run inside the iceoryx2/ submodule, so
+# the submodule itself stays unmodified.
+[build]
+rustflags = ["--cfg", "configuration_override"]
+
+# Target-specific rustflags suppress [build] rustflags entirely, so the
+# Windows entry must carry the cfg as well.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["--cfg", "configuration_override"]
+
+[env]
+IOX2_CUSTOM_PLATFORM_CONFIGURATION_PATH = { value = "platform/iceoryx2_settings.rs", relative = true }
