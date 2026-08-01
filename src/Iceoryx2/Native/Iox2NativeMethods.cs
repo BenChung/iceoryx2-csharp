@@ -195,7 +195,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Publisher Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 128, Pack = 16)]
+    [StructLayout(LayoutKind.Sequential, Size = 208, Pack = 16)]
     internal struct iox2_port_factory_publisher_builder_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
@@ -346,10 +346,10 @@ internal static partial class Iox2NativeMethods
     }
 
     // Client Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 24, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 256, Pack = 16)]
     internal struct iox2_port_factory_client_builder_storage_t { }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 16)]
     internal struct iox2_port_factory_client_builder_t
     {
         public iox2_service_type_e service_type;
@@ -358,10 +358,10 @@ internal static partial class Iox2NativeMethods
     }
 
     // Server Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 24, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 256, Pack = 16)]
     internal struct iox2_port_factory_server_builder_storage_t { }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 16)]
     internal struct iox2_port_factory_server_builder_t
     {
         public iox2_service_type_e service_type;
@@ -382,7 +382,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Server Storage
-    [StructLayout(LayoutKind.Sequential, Size = 1248, Pack = 16)]
+    [StructLayout(LayoutKind.Sequential, Size = 248, Pack = 16)]
     internal struct iox2_server_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
@@ -394,7 +394,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Request Mut Storage
-    [StructLayout(LayoutKind.Sequential, Size = 64, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 80, Pack = 8)]
     internal struct iox2_request_mut_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -405,8 +405,8 @@ internal static partial class Iox2NativeMethods
         public IntPtr deleter;
     }
 
-    // Request Storage
-    [StructLayout(LayoutKind.Sequential, Size = 96, Pack = 16)]
+    // Request Storage (native iox2_active_request_t, the server-side view of a request)
+    [StructLayout(LayoutKind.Sequential, Size = 128, Pack = 16)]
     internal struct iox2_request_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
@@ -418,7 +418,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Response Mut Storage
-    [StructLayout(LayoutKind.Sequential, Size = 64, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 88, Pack = 8)]
     internal struct iox2_response_mut_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -442,7 +442,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Pending Response Storage
-    [StructLayout(LayoutKind.Sequential, Size = 32, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 88, Pack = 8)]
     internal struct iox2_pending_response_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
