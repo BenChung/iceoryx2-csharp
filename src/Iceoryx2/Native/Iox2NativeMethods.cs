@@ -33,6 +33,9 @@ internal static partial class Iox2NativeMethods
     // Cross-Platform Library Loading
     // ========================================
 
+    // netstandard2.1 has no NativeLibrary resolver API; there the runtime's default
+    // DllImport probing (lib prefix + platform extension) resolves the library.
+#if NET6_0_OR_GREATER
     static Iox2NativeMethods()
     {
         NativeLibrary.SetDllImportResolver(typeof(Iox2NativeMethods).Assembly, DllImportResolver);
@@ -60,6 +63,7 @@ internal static partial class Iox2NativeMethods
 
         return IntPtr.Zero;
     }
+#endif
 
     // ========================================
     // Constants

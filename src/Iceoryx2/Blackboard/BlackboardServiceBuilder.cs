@@ -83,7 +83,14 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
     /// <exception cref="ArgumentException">Thrown when serviceName is empty or whitespace.</exception>
     public unsafe Result<BlackboardService<TKey>, Iox2Error> Open(string serviceName)
     {
+#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(serviceName);
+#else
+        if (serviceName is null)
+        {
+            throw new ArgumentNullException(nameof(serviceName));
+        }
+#endif
         if (string.IsNullOrWhiteSpace(serviceName))
         {
             throw new ArgumentException("Service name cannot be empty or whitespace.", nameof(serviceName));
@@ -176,8 +183,20 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
         IEnumerable<BlackboardEntry<TKey, TValue>> entries)
         where TValue : unmanaged
     {
+#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(serviceName);
         ArgumentNullException.ThrowIfNull(entries);
+#else
+        if (serviceName is null)
+        {
+            throw new ArgumentNullException(nameof(serviceName));
+        }
+
+        if (entries is null)
+        {
+            throw new ArgumentNullException(nameof(entries));
+        }
+#endif
 
         if (string.IsNullOrWhiteSpace(serviceName))
         {

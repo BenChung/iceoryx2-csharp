@@ -51,7 +51,14 @@ internal static class CallbackContext
     /// </summary>
     public static IntPtr Pin<T>(T state) where T : class
     {
+#if NET6_0_OR_GREATER
         ArgumentNullException.ThrowIfNull(state);
+#else
+        if (state is null)
+        {
+            throw new ArgumentNullException(nameof(state));
+        }
+#endif
         var handle = GCHandle.Alloc(state, GCHandleType.Normal);
         return GCHandle.ToIntPtr(handle);
     }
