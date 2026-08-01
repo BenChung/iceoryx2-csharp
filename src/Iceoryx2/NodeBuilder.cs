@@ -21,6 +21,7 @@ namespace Iceoryx2;
 public sealed class NodeBuilder
 {
     private string? _name;
+    private Config? _config;
 
     private NodeBuilder()
     {
@@ -37,6 +38,17 @@ public sealed class NodeBuilder
     public NodeBuilder Name(string name)
     {
         _name = name ?? throw new ArgumentNullException(nameof(name));
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the config of the node. <see cref="Create"/> copies the config
+    /// into the node, so disposing it afterwards is safe. Every service
+    /// created through the node inherits it.
+    /// </summary>
+    public NodeBuilder WithConfig(Config config)
+    {
+        _config = config ?? throw new ArgumentNullException(nameof(config));
         return this;
     }
 
@@ -69,6 +81,12 @@ public sealed class NodeBuilder
                     Native.Iox2NativeMethods.iox2_node_builder_set_name(ref builderHandle, nodeNamePtr);
                     Native.Iox2NativeMethods.iox2_node_name_drop(nodeNameHandle);
                 }
+            }
+
+            if (_config != null)
+            {
+                var configHandle = _config.Handle.DangerousGetHandle();
+                Native.Iox2NativeMethods.iox2_node_builder_set_config(ref builderHandle, ref configHandle);
             }
 
             // Create the node - pass IntPtr.Zero to let C FFI allocate the struct

@@ -482,6 +482,15 @@ internal static partial class Iox2NativeMethods
         IntPtr node_name_ptr);
 
     /// <summary>
+    /// Sets the config for the node builder. The builder copies the config.
+    /// C signature: void iox2_node_builder_set_config(iox2_node_builder_h_ref node_builder_handle, iox2_config_h_ref config_handle)
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_node_builder_set_config(
+        ref IntPtr node_builder_handle,
+        ref IntPtr config_handle);
+
+    /// <summary>
     /// Creates a node from the builder.
     /// C signature: int iox2_node_builder_create(iox2_node_builder_h node_builder_handle,
     ///                                           struct iox2_node_t *node_struct_ptr,
@@ -1196,6 +1205,53 @@ internal static partial class Iox2NativeMethods
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern IntPtr iox2_config_global_config();
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_config_default(
+        IntPtr config_struct_ptr,
+        out IntPtr config_handle);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_config_from_file(
+        IntPtr config_struct_ptr,
+        out IntPtr config_handle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string config_file);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_config_setup_global_config_from_file(
+        out IntPtr config_ptr,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string config_file);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_config_from_ptr(
+        IntPtr config_ptr,
+        IntPtr config_struct_ptr,
+        out IntPtr config_handle);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_config_clone(
+        ref IntPtr config_handle,
+        IntPtr config_struct_ptr,
+        out IntPtr cloned_config_handle);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_config_drop(IntPtr config_handle);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern IntPtr iox2_config_global_root_path(ref IntPtr config_handle);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_config_global_set_root_path(
+        ref IntPtr config_handle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string value);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern IntPtr iox2_config_global_prefix(ref IntPtr config_handle);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_config_global_set_prefix(
+        ref IntPtr config_handle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string value);
 
     // ========================================
     // Additional Logging API

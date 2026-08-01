@@ -76,6 +76,7 @@ public abstract class Iox2Error
             Iox2ErrorKind.WriterCreationFailed => new WriterCreationError(details),
             Iox2ErrorKind.ReaderCreationFailed => new ReaderCreationError(details),
             Iox2ErrorKind.EntryAccessFailed => new EntryAccessError(details),
+            Iox2ErrorKind.ConfigCreationFailed => new ConfigCreationError(details),
             Iox2ErrorKind.Unknown => new UnknownError(details),
             _ => new UnknownError(details)
         };

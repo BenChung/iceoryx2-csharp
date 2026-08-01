@@ -77,6 +77,8 @@ namespace Iceoryx2.ErrorHandling
         ReaderCreationFailed,
         /// <summary>Blackboard entry access failed.</summary>
         EntryAccessFailed,
+        /// <summary>Config creation failed.</summary>
+        ConfigCreationFailed,
         /// <summary>Unknown error.</summary>
         Unknown
     }
