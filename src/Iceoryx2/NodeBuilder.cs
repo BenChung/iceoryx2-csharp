@@ -64,9 +64,10 @@ public sealed class NodeBuilder
         {
             lock (Native.Iox2NativeMethods.NodeLifetimeLock)
             {
-                // Create node builder with proper struct
-                var builderStruct = new Native.Iox2NativeMethods.iox2_node_builder_t();
-                var builderHandle = Native.Iox2NativeMethods.iox2_node_builder_new(ref builderStruct);
+                // NULL - let C allocate the struct, as every other port and service
+                // builder here does. A C# mirror would have to track the native
+                // storage size exactly or the native write runs off the stack buffer.
+                var builderHandle = Native.Iox2NativeMethods.iox2_node_builder_new(IntPtr.Zero);
 
                 if (builderHandle == IntPtr.Zero)
                     return Result<Node, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.NodeCreationFailed, "no handle returned"));

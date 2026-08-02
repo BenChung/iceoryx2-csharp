@@ -148,16 +148,6 @@ public class EventStaticConfig
     /// </summary>
     public ulong? NotifierCreatedEvent { get; }
 
-    internal EventStaticConfig(ref Iox2NativeMethods.iox2_static_config_event_t native)
-    {
-        MaxNotifiers = (ulong)native.max_notifiers;
-        MaxListeners = (ulong)native.max_listeners;
-        MaxNodes = (ulong)native.max_nodes;
-        EventIdMaxValue = (ulong)native.event_id_max_value;
-        NotifierDeadEvent = native.has_notifier_dead_event ? (ulong)native.notifier_dead_event : null;
-        NotifierDroppedEvent = native.has_notifier_dropped_event ? (ulong)native.notifier_dropped_event : null;
-        NotifierCreatedEvent = native.has_notifier_created_event ? (ulong)native.notifier_created_event : null;
-    }
 }
 
 /// <summary>
@@ -200,16 +190,6 @@ public class PublishSubscribeStaticConfig
     /// </summary>
     public bool EnableSafeOverflow { get; }
 
-    internal PublishSubscribeStaticConfig(ref Iox2NativeMethods.iox2_static_config_publish_subscribe_t native)
-    {
-        MaxSubscribers = (ulong)native.max_subscribers;
-        MaxPublishers = (ulong)native.max_publishers;
-        MaxNodes = (ulong)native.max_nodes;
-        HistorySize = (ulong)native.history_size;
-        SubscriberMaxBufferSize = (ulong)native.subscriber_max_buffer_size;
-        SubscriberMaxBorrowedSamples = (ulong)native.subscriber_max_borrowed_samples;
-        EnableSafeOverflow = native.enable_safe_overflow;
-    }
 }
 
 /// <summary>
@@ -267,19 +247,6 @@ public class RequestResponseStaticConfig
     /// </summary>
     public ulong MaxBorrowedResponsesPerPendingResponse { get; }
 
-    internal RequestResponseStaticConfig(ref Iox2NativeMethods.iox2_static_config_request_response_t native)
-    {
-        EnableSafeOverflowForRequests = native.enable_safe_overflow_for_requests;
-        EnableSafeOverflowForResponses = native.enable_safe_overflow_for_responses;
-        EnableFireAndForgetRequests = native.enable_fire_and_forget_requests;
-        MaxActiveRequestsPerClient = (ulong)native.max_active_requests_per_client;
-        MaxLoanedRequests = (ulong)native.max_loaned_requests;
-        MaxResponseBufferSize = (ulong)native.max_response_buffer_size;
-        MaxServers = (ulong)native.max_servers;
-        MaxClients = (ulong)native.max_clients;
-        MaxNodes = (ulong)native.max_nodes;
-        MaxBorrowedResponsesPerPendingResponse = (ulong)native.max_borrowed_responses_per_pending_response;
-    }
 }
 
 /// <summary>
@@ -302,10 +269,4 @@ public class BlackboardStaticConfig
     /// </summary>
     public ulong MaxNodes { get; }
 
-    internal BlackboardStaticConfig(ref Iox2NativeMethods.iox2_static_config_blackboard_t native)
-    {
-        MaxReaders = (ulong)native.max_readers;
-        MaxWriters = (ulong)native.max_writers;
-        MaxNodes = (ulong)native.max_nodes;
-    }
 }

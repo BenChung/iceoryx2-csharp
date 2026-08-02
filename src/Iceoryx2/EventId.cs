@@ -39,15 +39,15 @@ public readonly struct EventId : IEquatable<EventId>
     /// <summary>
     /// Converts the EventId to its native representation.
     /// </summary>
-    internal Native.Iox2NativeMethods.iox2_event_id_t ToNative()
+    internal Native.Interop.iox2_event_id_t ToNative()
     {
-        return new Native.Iox2NativeMethods.iox2_event_id_t { value = (UIntPtr)_value };
+        return new Native.Interop.iox2_event_id_t { value = (UIntPtr)_value };
     }
 
     /// <summary>
     /// Creates an EventId from its native representation.
     /// </summary>
-    internal static EventId FromNative(Native.Iox2NativeMethods.iox2_event_id_t native)
+    internal static EventId FromNative(Native.Interop.iox2_event_id_t native)
     {
         return new EventId((ulong)native.value);
     }

@@ -74,10 +74,9 @@ internal static partial class Iox2NativeMethods
     // Constants
     // ========================================
 
-    internal const int IOX2_OK = 0;
-    internal const int IOX2_NODE_NAME_LENGTH = 128;
-    internal const int IOX2_SERVICE_NAME_LENGTH = 255;
-    internal const int IOX2_SERVICE_ID_LENGTH = 64;
+    // Header-derived values live in Interop.g.cs; this alias keeps the existing
+    // call sites terse.
+    internal const int IOX2_OK = Interop.Iox2Constants.IOX2_OK;
 
     // ========================================
     // Enums
@@ -132,332 +131,34 @@ internal static partial class Iox2NativeMethods
     // ========================================
 
     // Node Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 18696, Pack = 8)]
-    internal struct iox2_node_builder_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_node_builder_t
-    {
-        public iox2_node_builder_storage_t value;
-        public IntPtr deleter;
-    }
 
     // Node Storage
-    [StructLayout(LayoutKind.Sequential, Size = 16, Pack = 8)]
-    internal struct iox2_node_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_node_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_node_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Node Name Storage
-    [StructLayout(LayoutKind.Sequential, Size = 152, Pack = 8)]
-    internal struct iox2_node_name_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_node_name_t
-    {
-        public iox2_node_name_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Service Name Storage
-    [StructLayout(LayoutKind.Sequential, Size = 272, Pack = 8)]
-    internal struct iox2_service_name_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_service_name_t
-    {
-        public iox2_service_name_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Service Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 9104, Pack = 8)]
-    internal struct iox2_service_builder_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_service_builder_t
-    {
-        public iox2_service_builder_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Port Factory Pub/Sub Storage
-    [StructLayout(LayoutKind.Sequential, Size = 1656, Pack = 8)]
-    internal struct iox2_port_factory_pub_sub_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_port_factory_pub_sub_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_pub_sub_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Publisher Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 208, Pack = 16)]
-    internal struct iox2_port_factory_publisher_builder_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_port_factory_publisher_builder_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_publisher_builder_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Subscriber Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 112, Pack = 16)]
-    internal struct iox2_port_factory_subscriber_builder_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_port_factory_subscriber_builder_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_subscriber_builder_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Publisher Storage
-    [StructLayout(LayoutKind.Sequential, Size = 248, Pack = 16)]
-    internal struct iox2_publisher_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_publisher_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_publisher_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Subscriber Storage
-    [StructLayout(LayoutKind.Sequential, Size = 1232, Pack = 16)]
-    internal struct iox2_subscriber_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_subscriber_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_subscriber_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Sample Mut Storage
-    [StructLayout(LayoutKind.Sequential, Size = 64, Pack = 8)]
-    internal struct iox2_sample_mut_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_sample_mut_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_sample_mut_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Sample Storage
-    [StructLayout(LayoutKind.Sequential, Size = 96, Pack = 16)]
-    internal struct iox2_sample_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_sample_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_sample_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Port Factory Event Storage
-    [StructLayout(LayoutKind.Sequential, Size = 1656, Pack = 8)]
-    internal struct iox2_port_factory_event_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_port_factory_event_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_event_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Notifier Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 24, Pack = 8)]
-    internal struct iox2_port_factory_notifier_builder_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_port_factory_notifier_builder_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_notifier_builder_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Listener Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 24, Pack = 8)]
-    internal struct iox2_port_factory_listener_builder_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_port_factory_listener_builder_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_listener_builder_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Notifier Storage
-    [StructLayout(LayoutKind.Sequential, Size = 1656, Pack = 8)]
-    internal struct iox2_notifier_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_notifier_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_notifier_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Listener Storage
-    [StructLayout(LayoutKind.Sequential, Size = 1656, Pack = 8)]
-    internal struct iox2_listener_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_listener_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_listener_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Event ID
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct iox2_event_id_t
-    {
-        public UIntPtr value;
-    }
-
     // Port Factory Request Response Storage
-    [StructLayout(LayoutKind.Sequential, Size = 1656, Pack = 8)]
-    internal struct iox2_port_factory_request_response_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_port_factory_request_response_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_request_response_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Client Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 256, Pack = 16)]
-    internal struct iox2_port_factory_client_builder_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_port_factory_client_builder_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_client_builder_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Server Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 256, Pack = 16)]
-    internal struct iox2_port_factory_server_builder_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_port_factory_server_builder_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_port_factory_server_builder_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Client Storage
-    [StructLayout(LayoutKind.Sequential, Size = 248, Pack = 16)]
-    internal struct iox2_client_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_client_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_client_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Server Storage
-    [StructLayout(LayoutKind.Sequential, Size = 248, Pack = 16)]
-    internal struct iox2_server_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_server_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_server_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Request Mut Storage
-    [StructLayout(LayoutKind.Sequential, Size = 80, Pack = 8)]
-    internal struct iox2_request_mut_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_request_mut_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_request_mut_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Request Storage (native iox2_active_request_t, the server-side view of a request)
-    [StructLayout(LayoutKind.Sequential, Size = 128, Pack = 16)]
-    internal struct iox2_request_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_request_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_request_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Response Mut Storage
-    [StructLayout(LayoutKind.Sequential, Size = 88, Pack = 8)]
-    internal struct iox2_response_mut_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_response_mut_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_response_mut_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Response Storage
-    [StructLayout(LayoutKind.Sequential, Size = 96, Pack = 16)]
-    internal struct iox2_response_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_response_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_response_storage_t value;
-        public IntPtr deleter;
-    }
-
     // Pending Response Storage
-    [StructLayout(LayoutKind.Sequential, Size = 88, Pack = 8)]
-    internal struct iox2_pending_response_storage_t { }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    internal struct iox2_pending_response_t
-    {
-        public iox2_service_type_e service_type;
-        public iox2_pending_response_storage_t value;
-        public IntPtr deleter;
-    }
-
     // ========================================
     // Logging API
     // ========================================
@@ -475,7 +176,7 @@ internal static partial class Iox2NativeMethods
     /// Returns: handle to the builder (pointer to opaque type)
     /// </summary>
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_builder_new")]
-    internal static extern IntPtr iox2_node_builder_new(ref iox2_node_builder_t node_builder_struct);
+    internal static extern IntPtr iox2_node_builder_new(IntPtr node_builder_struct_ptr);
 
     /// <summary>
     /// Sets the name for the node builder.
@@ -514,86 +215,9 @@ internal static partial class Iox2NativeMethods
     // Service Discovery - Type Details
     // ========================================
 
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct iox2_type_detail_t
-    {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-        public byte[] type_name;
-        public int type_name_len;
-        public ulong size;
-        public ulong alignment;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct iox2_message_type_details_t
-    {
-        public iox2_type_detail_t header;
-        public iox2_type_detail_t user_header;
-        public iox2_type_detail_t payload;
-    }
-
     // ========================================
     // Service Discovery - Static Config Structs
     // ========================================
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct iox2_static_config_event_t
-    {
-        public UIntPtr max_notifiers;
-        public UIntPtr max_listeners;
-        public UIntPtr max_nodes;
-        public UIntPtr event_id_max_value;
-        public UIntPtr notifier_dead_event;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool has_notifier_dead_event;
-        public UIntPtr notifier_dropped_event;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool has_notifier_dropped_event;
-        public UIntPtr notifier_created_event;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool has_notifier_created_event;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct iox2_static_config_publish_subscribe_t
-    {
-        public UIntPtr max_subscribers;
-        public UIntPtr max_publishers;
-        public UIntPtr max_nodes;
-        public UIntPtr history_size;
-        public UIntPtr subscriber_max_buffer_size;
-        public UIntPtr subscriber_max_borrowed_samples;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool enable_safe_overflow;
-        public iox2_message_type_details_t message_type_details;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct iox2_static_config_request_response_t
-    {
-        [MarshalAs(UnmanagedType.U1)]
-        public bool enable_safe_overflow_for_requests;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool enable_safe_overflow_for_responses;
-        [MarshalAs(UnmanagedType.U1)]
-        public bool enable_fire_and_forget_requests;
-        public UIntPtr max_active_requests_per_client;
-        public UIntPtr max_loaned_requests;
-        public UIntPtr max_response_buffer_size;
-        public UIntPtr max_servers;
-        public UIntPtr max_clients;
-        public UIntPtr max_nodes;
-        public UIntPtr max_borrowed_responses_per_pending_response;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct iox2_static_config_blackboard_t
-    {
-        public UIntPtr max_readers;
-        public UIntPtr max_writers;
-        public UIntPtr max_nodes;
-        public iox2_type_detail_t type_details;
-    }
 
     // The native iox2_static_config_t and its details union are deliberately not
     // mirrored here. Overlapping the per-pattern detail structs at FieldOffset(0)
@@ -927,7 +551,7 @@ internal static partial class Iox2NativeMethods
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_notifier_builder_set_default_event_id")]
     internal static extern void iox2_port_factory_notifier_builder_set_default_event_id(
         ref IntPtr notifier_builder_handle,
-        ref iox2_event_id_t event_id);
+        ref Interop.iox2_event_id_t event_id);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_notifier_builder_create")]
     internal static extern int iox2_port_factory_notifier_builder_create(
@@ -950,7 +574,7 @@ internal static partial class Iox2NativeMethods
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_notifier_notify_with_custom_event_id")]
     internal static extern int iox2_notifier_notify_with_custom_event_id(
         ref IntPtr notifier_handle,
-        ref iox2_event_id_t custom_event_id,
+        ref Interop.iox2_event_id_t custom_event_id,
         IntPtr number_of_notified_listeners_ptr);  // Can be NULL
 
     // ========================================
@@ -973,13 +597,13 @@ internal static partial class Iox2NativeMethods
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_try_wait_one")]
     internal static extern int iox2_listener_try_wait_one(
         ref IntPtr listener_handle,
-        out iox2_event_id_t event_id,
+        out Interop.iox2_event_id_t event_id,
         out bool has_received_one);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_timed_wait_one")]
     internal static extern int iox2_listener_timed_wait_one(
         ref IntPtr listener_handle,
-        out iox2_event_id_t event_id,
+        out Interop.iox2_event_id_t event_id,
         out bool has_received_one,
         ulong seconds,
         uint nanoseconds);
@@ -987,7 +611,7 @@ internal static partial class Iox2NativeMethods
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_blocking_wait_one")]
     internal static extern int iox2_listener_blocking_wait_one(
         ref IntPtr listener_handle,
-        out iox2_event_id_t event_id,
+        out Interop.iox2_event_id_t event_id,
         out bool has_received_one);
 
     // ========================================

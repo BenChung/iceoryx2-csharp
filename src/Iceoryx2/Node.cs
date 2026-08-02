@@ -11,6 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 using Iceoryx2.Native;
+using Interop = Iceoryx2.Native.Interop;
 using Iceoryx2.SafeHandles;
 using System;
 using System.Collections.Generic;
@@ -57,10 +58,13 @@ public sealed class Node : IDisposable
         _serviceType = serviceType;
     }
 
-    // repr(C) pads the id+name char run out to the alignment of the 4-byte
-    // messaging_pattern enum that follows it, so the offset is not id + name.
-    private const int MessagingPatternOffset =
-        (Iox2NativeMethods.IOX2_SERVICE_ID_LENGTH + Iox2NativeMethods.IOX2_SERVICE_NAME_LENGTH + 3) & ~3;
+    private static readonly int s_idOffset = OffsetOf(nameof(Interop.iox2_static_config_t.id));
+    private static readonly int s_nameOffset = OffsetOf(nameof(Interop.iox2_static_config_t.name));
+    private static readonly int s_messagingPatternOffset =
+        OffsetOf(nameof(Interop.iox2_static_config_t.messaging_pattern));
+
+    private static int OffsetOf(string field) =>
+        Marshal.OffsetOf<Interop.iox2_static_config_t>(field).ToInt32();
 
     /// <summary>
     /// Collects the discovery callback's results plus any failure it hit. An exception
@@ -84,21 +88,19 @@ public sealed class Node : IDisposable
                 return Iox2NativeMethods.iox2_callback_progression_e.STOP;
             }
 
-            // Read the fields directly at their native offsets rather than marshalling
-            // iox2_static_config_t, whose trailing details union has no valid C# mirror.
-            byte[] id = new byte[Iox2NativeMethods.IOX2_SERVICE_ID_LENGTH];
-            byte[] name = new byte[Iox2NativeMethods.IOX2_SERVICE_NAME_LENGTH];
+            // Field offsets come from the generated interop struct, so padding between
+            // fields is the CLR's problem rather than hand arithmetic against the header.
+            byte[] id = new byte[Interop.Iox2Constants.IOX2_SERVICE_HASH_LENGTH];
+            byte[] name = new byte[Interop.Iox2Constants.IOX2_SERVICE_NAME_LENGTH];
 
-            // Read the id array.
-            Marshal.Copy(configPtr, id, 0, Iox2NativeMethods.IOX2_SERVICE_ID_LENGTH);
+            Marshal.Copy(IntPtr.Add(configPtr, s_idOffset),
+                id, 0, Interop.Iox2Constants.IOX2_SERVICE_HASH_LENGTH);
 
-            // Read the name array (offset by id size).
-            IntPtr namePtr = IntPtr.Add(configPtr, Iox2NativeMethods.IOX2_SERVICE_ID_LENGTH);
-            Marshal.Copy(namePtr, name, 0, Iox2NativeMethods.IOX2_SERVICE_NAME_LENGTH);
+            Marshal.Copy(IntPtr.Add(configPtr, s_nameOffset),
+                name, 0, Interop.Iox2Constants.IOX2_SERVICE_NAME_LENGTH);
 
-            // Read the messaging pattern.
-            IntPtr patternPtr = IntPtr.Add(configPtr, MessagingPatternOffset);
-            var messagingPattern = (Iox2NativeMethods.iox2_messaging_pattern_e)Marshal.ReadInt32(patternPtr);
+            var messagingPattern = (Iox2NativeMethods.iox2_messaging_pattern_e)Marshal.ReadInt32(
+                IntPtr.Add(configPtr, s_messagingPatternOffset));
 
             ctx.Services.Add(new ServiceStaticConfig(id, name, messagingPattern));
             return Iox2NativeMethods.iox2_callback_progression_e.CONTINUE;

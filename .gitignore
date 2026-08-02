@@ -49,3 +49,8 @@ runtimes/
 tools/
 # Machine-local game deployment settings for the DeployToGame target
 GameDeploy.props
+
+# Python bytecode from scripts/
+__pycache__/
+*.py[cod]
+

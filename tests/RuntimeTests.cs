@@ -41,9 +41,8 @@ namespace Iceoryx2.Tests
         [Fact]
         public void NodeBuilderCanBeCreated()
         {
-            // Test that we can create a NodeBuilder with proper struct
-            var builderStruct = new Iox2NativeMethods.iox2_node_builder_t();
-            var builderHandle = Iox2NativeMethods.iox2_node_builder_new(ref builderStruct);
+            // NULL lets the C side allocate the builder storage on the heap.
+            var builderHandle = Iox2NativeMethods.iox2_node_builder_new(IntPtr.Zero);
 
             Assert.NotEqual(IntPtr.Zero, builderHandle);
         }
@@ -51,9 +50,8 @@ namespace Iceoryx2.Tests
         [Fact]
         public void CanCreateNode()
         {
-            // Create a node builder with proper struct
-            var builderStruct = new Iox2NativeMethods.iox2_node_builder_t();
-            var builderHandle = Iox2NativeMethods.iox2_node_builder_new(ref builderStruct);
+            // NULL lets the C side allocate the builder storage on the heap.
+            var builderHandle = Iox2NativeMethods.iox2_node_builder_new(IntPtr.Zero);
             Assert.NotEqual(IntPtr.Zero, builderHandle);
 
             // Build the node - pass IntPtr.Zero to let C allocate on heap
@@ -77,8 +75,7 @@ namespace Iceoryx2.Tests
         public void ServiceBuilderCanBeCreated()
         {
             // First create a node
-            var builderStruct = new Iox2NativeMethods.iox2_node_builder_t();
-            var nodeBuilderHandle = Iox2NativeMethods.iox2_node_builder_new(ref builderStruct);
+            var nodeBuilderHandle = Iox2NativeMethods.iox2_node_builder_new(IntPtr.Zero);
 
             var result = Iox2NativeMethods.iox2_node_builder_create(
                 nodeBuilderHandle,

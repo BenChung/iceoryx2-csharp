@@ -1,0 +1,86 @@
+# ClangSharpPInvokeGenerator configuration for the native layout bindings.
+#
+# Generates src/Iceoryx2/Native/Interop.g.cs from the cbindgen header, so struct
+# layouts, enum values and IOX2_ constants are derived from the header rather
+# than hand-mirrored. P/Invoke signatures stay hand-written in
+# Iox2NativeMethods.cs; a stale one already fails loudly in Iox2Runtime.Prelink.
+#
+# Regenerate after a submodule bump and commit the result:
+#   dotnet tool restore
+#   dotnet tool run ClangSharpPInvokeGenerator -- @iceoryx2-interop.rsp
+#
+# build.sh verifies the committed file is current.
+#
+# The bindings land in their own namespace so the generated enums coexist with
+# the hand-written ones nested in Iox2NativeMethods.
+#
+# --include takes a declaration name; it does not pull in dependencies, so a new
+# entry may need its field types listed too. The generated file fails to compile
+# when one is missing, which is the whole feedback loop.
+
+--file
+iceoryx2/target/release/iceoryx2-ffi-c-cbindgen/include/iox2/iceoryx2.h
+--language
+c
+--namespace
+Iceoryx2.Native.Interop
+--methodClassName
+Iox2Constants
+--output
+src/Iceoryx2/Native/Interop.g.cs
+--config
+generate-macro-bindings
+--with-access-specifier
+*=Internal
+
+# Layouts the binding reads out of native memory.
+--include
+iox2_static_config_t
+--include
+iox2_static_config_details_t
+--include
+iox2_static_config_event_t
+--include
+iox2_static_config_publish_subscribe_t
+--include
+iox2_static_config_request_response_t
+--include
+iox2_static_config_blackboard_t
+--include
+iox2_message_type_details_t
+--include
+iox2_type_detail_t
+--include
+iox2_attribute_set_h_t
+
+# Layouts the binding passes by value.
+--include
+iox2_event_id_t
+
+# Enums referenced by the above.
+--include
+iox2_messaging_pattern_e
+--include
+iox2_type_variant_e
+
+# Header constants.
+--include
+IOX2_OK
+--include
+IOX2_NODE_NAME_LENGTH
+--include
+IOX2_SERVICE_NAME_LENGTH
+--include
+IOX2_SERVICE_HASH_LENGTH
+--include
+IOX2_TYPE_NAME_LENGTH
+--include
+IOX2_ATTRIBUTE_KEY_LENGTH
+--include
+IOX2_ATTRIBUTE_VALUE_LENGTH
+--include
+IOX2_MAX_ATTRIBUTES_PER_SERVICE
+--include
+IOX2_MAX_BLACKBOARD_KEY_SIZE
+--include
+IOX2_MAX_BLACKBOARD_KEY_ALIGNMENT

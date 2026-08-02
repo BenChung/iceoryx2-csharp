@@ -37,6 +37,36 @@ if ! cargo build --release --package iceoryx2-ffi-c; then
     exit 1
 fi
 
+cd "$SCRIPT_DIR"
+
+# Interop.g.cs is committed, so building the C# side needs neither the generator
+# nor the header. Regenerate against the header the native library was just built
+# from and fail if the result differs from what is checked in.
+echo -e "${YELLOW}Step 2: Checking generated interop bindings are current...${NC}"
+GENERATED=src/Iceoryx2/Native/Interop.g.cs
+
+dotnet tool restore >/dev/null || { echo -e "${RED}✗ dotnet tool restore failed${NC}"; exit 1; }
+
+# Generate beside the committed file and compare, so the check does not depend on
+# git state and leaves the working tree untouched when it fails.
+PREVIOUS=$(mktemp)
+cp "$GENERATED" "$PREVIOUS"
+trap 'rm -f "$PREVIOUS"' EXIT
+
+if ! dotnet tool run ClangSharpPInvokeGenerator -- @iceoryx2-interop.rsp; then
+    cp "$PREVIOUS" "$GENERATED"
+    echo -e "${RED}✗ Failed to generate interop bindings${NC}"
+    exit 1
+fi
+
+if ! diff -q "$PREVIOUS" "$GENERATED" >/dev/null; then
+    echo -e "${RED}✗ $GENERATED was stale and has been regenerated. Review and commit it:${NC}"
+    diff "$PREVIOUS" "$GENERATED" | head -40
+    exit 1
+fi
+echo -e "${GREEN}✓ Interop bindings up to date${NC}"
+echo ""
+
 echo -e "${GREEN}✓ C FFI library built successfully${NC}"
 echo ""
 
