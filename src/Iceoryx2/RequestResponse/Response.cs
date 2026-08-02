@@ -31,7 +31,22 @@ public sealed class Response<TResponse> : IDisposable
     }
 
     /// <summary>
+    /// Gets the number of elements in the received response payload.
+    /// </summary>
+    public int Length
+    {
+        get
+        {
+            ThrowIfDisposed();
+
+            iox2_response_payload(ref _handle, out _, out var numberOfElements);
+            return (int)numberOfElements;
+        }
+    }
+
+    /// <summary>
     /// Gets the response payload data.
+    /// For single-element responses only (Length == 1); slice responses use <see cref="PayloadAsReadOnlySpan"/>.
     /// </summary>
     public unsafe TResponse Payload
     {
@@ -39,7 +54,7 @@ public sealed class Response<TResponse> : IDisposable
         {
             ThrowIfDisposed();
 
-            iox2_response_payload(ref _handle, out var payloadPtr, out var payloadLen);
+            iox2_response_payload(ref _handle, out var payloadPtr, out _);
 
             if (payloadPtr == IntPtr.Zero)
             {
@@ -47,6 +62,27 @@ public sealed class Response<TResponse> : IDisposable
             }
 
             return *(TResponse*)payloadPtr;
+        }
+    }
+
+    /// <summary>
+    /// Gets the payload as a read-only Span over shared memory, spanning all
+    /// <see cref="Length"/> elements the server sent.
+    /// </summary>
+    public unsafe ReadOnlySpan<TResponse> PayloadAsReadOnlySpan
+    {
+        get
+        {
+            ThrowIfDisposed();
+
+            iox2_response_payload(ref _handle, out var payloadPtr, out var numberOfElements);
+
+            if (payloadPtr == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Failed to get response payload");
+            }
+
+            return new ReadOnlySpan<TResponse>(payloadPtr.ToPointer(), (int)numberOfElements);
         }
     }
 

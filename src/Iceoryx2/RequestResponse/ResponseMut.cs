@@ -26,14 +26,22 @@ public sealed class ResponseMut<TResponse> : IDisposable
 {
     private IntPtr _handle;
     private bool _disposed;
+    private readonly int _numberOfElements;
 
-    internal ResponseMut(IntPtr handle)
+    internal ResponseMut(IntPtr handle, int numberOfElements = 1)
     {
         _handle = handle;
+        _numberOfElements = numberOfElements;
     }
 
     /// <summary>
+    /// Gets the number of elements in this response, as passed to the loan that produced it.
+    /// </summary>
+    public int Length => _numberOfElements;
+
+    /// <summary>
     /// Gets or sets the response payload data.
+    /// For single-element responses only (Length == 1); slice responses use <see cref="PayloadAsSpan"/>.
     /// </summary>
     public unsafe TResponse Payload
     {
@@ -41,28 +49,54 @@ public sealed class ResponseMut<TResponse> : IDisposable
         {
             ThrowIfDisposed();
 
-            iox2_response_mut_payload_mut(ref _handle, out var payloadPtr, out var payloadLen);
-
-            if (payloadPtr == IntPtr.Zero)
-            {
-                throw new InvalidOperationException("Failed to get response payload");
-            }
-
-            return *(TResponse*)payloadPtr;
+            return *(TResponse*)PayloadPtr();
         }
         set
         {
             ThrowIfDisposed();
 
-            iox2_response_mut_payload_mut(ref _handle, out var payloadPtr, out var payloadLen);
-
-            if (payloadPtr == IntPtr.Zero)
-            {
-                throw new InvalidOperationException("Failed to get response payload");
-            }
-
-            *(TResponse*)payloadPtr = value;
+            *(TResponse*)PayloadPtr() = value;
         }
+    }
+
+    /// <summary>
+    /// Gets the payload as a writable Span over shared memory, spanning all
+    /// <see cref="Length"/> elements.
+    /// </summary>
+    public unsafe Span<TResponse> PayloadAsSpan
+    {
+        get
+        {
+            ThrowIfDisposed();
+
+            return new Span<TResponse>(PayloadPtr().ToPointer(), _numberOfElements);
+        }
+    }
+
+    /// <summary>
+    /// Gets the payload as a read-only Span over shared memory, spanning all
+    /// <see cref="Length"/> elements.
+    /// </summary>
+    public unsafe ReadOnlySpan<TResponse> PayloadAsReadOnlySpan
+    {
+        get
+        {
+            ThrowIfDisposed();
+
+            return new ReadOnlySpan<TResponse>(PayloadPtr().ToPointer(), _numberOfElements);
+        }
+    }
+
+    private IntPtr PayloadPtr()
+    {
+        iox2_response_mut_payload_mut(ref _handle, out var payloadPtr, out _);
+
+        if (payloadPtr == IntPtr.Zero)
+        {
+            throw new InvalidOperationException("Failed to get response payload");
+        }
+
+        return payloadPtr;
     }
 
     /// <summary>

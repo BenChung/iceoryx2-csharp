@@ -68,7 +68,7 @@ public sealed class Reader<TKey> : IDisposable
             out var entryHandlePtr,
             (IntPtr)keyPtr,
             valueTypeName,
-            valueTypeName.Length,
+            System.Text.Encoding.UTF8.GetByteCount(valueTypeName),
             valueTypeSize,
             valueTypeAlignment);
 

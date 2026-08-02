@@ -1072,6 +1072,12 @@ internal static partial class Iox2NativeMethods
     // Client Builder API
     // ========================================
 
+    // Bounds the element count accepted by iox2_client_loan_slice_uninit.
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_client_builder_set_initial_max_slice_len")]
+    internal static extern void iox2_port_factory_client_builder_set_initial_max_slice_len(
+        ref IntPtr client_builder_handle,
+        UIntPtr value);
+
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_client_builder_create")]
     internal static extern int iox2_port_factory_client_builder_create(
         IntPtr client_builder_handle,
@@ -1110,6 +1116,12 @@ internal static partial class Iox2NativeMethods
     // ========================================
     // Server Builder API
     // ========================================
+
+    // Bounds the element count accepted by iox2_active_request_loan_slice_uninit.
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_server_builder_set_initial_max_slice_len")]
+    internal static extern void iox2_port_factory_server_builder_set_initial_max_slice_len(
+        ref IntPtr server_builder_handle,
+        UIntPtr value);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_server_builder_create")]
     internal static extern int iox2_port_factory_server_builder_create(
@@ -1154,7 +1166,7 @@ internal static partial class Iox2NativeMethods
     internal static extern int iox2_active_request_send_copy(
         ref IntPtr active_request_handle,
         IntPtr data_ptr,
-        UIntPtr data_len,
+        UIntPtr size_of_element,
         UIntPtr number_of_elements);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_request_mut_payload_mut")]

@@ -102,7 +102,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
         var serviceNameResult = iox2_service_name_new(
             IntPtr.Zero,
             serviceName,
-            serviceName.Length,
+            System.Text.Encoding.UTF8.GetByteCount(serviceName),
             out var serviceNameHandle);
 
         if (serviceNameResult != IOX2_OK)
@@ -142,7 +142,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
             var keyResult = iox2_service_builder_blackboard_opener_set_key_type_details(
                 ref blackboardOpenerHandle,
                 keyTypeName,
-                keyTypeName.Length,
+                System.Text.Encoding.UTF8.GetByteCount(keyTypeName),
                 keyTypeSize,
                 keyTypeAlignment);
 
@@ -215,7 +215,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
         var serviceNameResult = iox2_service_name_new(
             IntPtr.Zero,
             serviceName,
-            serviceName.Length,
+            System.Text.Encoding.UTF8.GetByteCount(serviceName),
             out var serviceNameHandle);
 
         if (serviceNameResult != IOX2_OK)
@@ -255,7 +255,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
             var keyResult = iox2_service_builder_blackboard_creator_set_key_type_details(
                 ref blackboardCreatorHandle,
                 keyTypeName,
-                keyTypeName.Length,
+                System.Text.Encoding.UTF8.GetByteCount(keyTypeName),
                 keyTypeSize,
                 keyTypeAlignment);
 
@@ -303,7 +303,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
                         valuePtr,
                         null, // No release callback - we manage memory ourselves
                         valueTypeName,
-                        valueTypeName.Length,
+                        System.Text.Encoding.UTF8.GetByteCount(valueTypeName),
                         valueTypeSize,
                         valueTypeAlignment);
                 }

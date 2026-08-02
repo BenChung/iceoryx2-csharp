@@ -32,10 +32,87 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
     where TResponse : unmanaged
 {
     private readonly Node _node;
+    private bool _dynamicRequestPayloads;
+    private bool _dynamicResponsePayloads;
+    private ulong? _initialMaxRequestSliceLen;
+    private ulong? _initialMaxResponseSliceLen;
 
     internal RequestResponseServiceBuilder(Node node)
     {
         _node = node;
+    }
+
+    /// <summary>
+    /// Enables dynamic-sized payloads (slices/arrays) for both requests and responses.
+    /// Clients can then use <c>LoanSlice()</c> and servers <c>LoanResponseSlice()</c>.
+    /// Every participant in the service must declare the same variant, and the
+    /// corresponding <c>InitialMaxSliceLen</c> bounds how many elements a port may loan.
+    /// </summary>
+    /// <returns>This builder for method chaining</returns>
+    public RequestResponseServiceBuilder<TRequest, TResponse> EnableDynamicPayloads()
+    {
+        _dynamicRequestPayloads = true;
+        _dynamicResponsePayloads = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Enables dynamic-sized request payloads, leaving responses fixed-size.
+    /// Use for RPC where the request is variable-length and the reply is a fixed struct.
+    /// </summary>
+    /// <returns>This builder for method chaining</returns>
+    public RequestResponseServiceBuilder<TRequest, TResponse> EnableDynamicRequestPayloads()
+    {
+        _dynamicRequestPayloads = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Enables dynamic-sized response payloads, leaving requests fixed-size.
+    /// Use for RPC where a fixed query returns a variable-length result.
+    /// </summary>
+    /// <returns>This builder for method chaining</returns>
+    public RequestResponseServiceBuilder<TRequest, TResponse> EnableDynamicResponsePayloads()
+    {
+        _dynamicResponsePayloads = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the initial maximum slice length for both the client and server ports
+    /// created from this service.
+    /// </summary>
+    /// <param name="value">Initial maximum number of elements in a slice</param>
+    /// <returns>This builder for method chaining</returns>
+    public RequestResponseServiceBuilder<TRequest, TResponse> InitialMaxSliceLen(ulong value)
+    {
+        _initialMaxRequestSliceLen = value;
+        _initialMaxResponseSliceLen = value;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the initial maximum slice length for the client ports created from this
+    /// service, bounding the element count accepted by <c>Client.LoanSlice()</c>.
+    /// </summary>
+    /// <param name="value">Initial maximum number of elements in a request slice</param>
+    /// <returns>This builder for method chaining</returns>
+    public RequestResponseServiceBuilder<TRequest, TResponse> InitialMaxRequestSliceLen(ulong value)
+    {
+        _initialMaxRequestSliceLen = value;
+        return this;
+    }
+
+    /// <summary>
+    /// Sets the initial maximum slice length for the server ports created from this
+    /// service, bounding the element count accepted by <c>Request.LoanResponseSlice()</c>.
+    /// </summary>
+    /// <param name="value">Initial maximum number of elements in a response slice</param>
+    /// <returns>This builder for method chaining</returns>
+    public RequestResponseServiceBuilder<TRequest, TResponse> InitialMaxResponseSliceLen(ulong value)
+    {
+        _initialMaxResponseSliceLen = value;
+        return this;
     }
 
     /// <summary>
@@ -66,7 +143,7 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
         var serviceNameResult = iox2_service_name_new(
             IntPtr.Zero,
             serviceName,
-            serviceName.Length,
+            System.Text.Encoding.UTF8.GetByteCount(serviceName),
             out var serviceNameHandle);
 
         if (serviceNameResult != IOX2_OK)
@@ -105,9 +182,9 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
 
             var requestResult = iox2_service_builder_request_response_set_request_payload_type_details(
                 ref requestResponseBuilderHandle,
-                iox2_type_variant_e.FIXED_SIZE,
+                _dynamicRequestPayloads ? iox2_type_variant_e.DYNAMIC : iox2_type_variant_e.FIXED_SIZE,
                 requestTypeName,
-                requestTypeName.Length,
+                System.Text.Encoding.UTF8.GetByteCount(requestTypeName),
                 requestTypeSize,
                 requestTypeAlignment);
 
@@ -123,9 +200,9 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
 
             var responseResult = iox2_service_builder_request_response_set_response_payload_type_details(
                 ref requestResponseBuilderHandle,
-                iox2_type_variant_e.FIXED_SIZE,
+                _dynamicResponsePayloads ? iox2_type_variant_e.DYNAMIC : iox2_type_variant_e.FIXED_SIZE,
                 responseTypeName,
-                responseTypeName.Length,
+                System.Text.Encoding.UTF8.GetByteCount(responseTypeName),
                 responseTypeSize,
                 responseTypeAlignment);
 
@@ -146,7 +223,10 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
             }
 
             return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Ok(
-                new RequestResponseService<TRequest, TResponse>(portFactoryHandle));
+                new RequestResponseService<TRequest, TResponse>(
+                    portFactoryHandle,
+                    _initialMaxRequestSliceLen,
+                    _initialMaxResponseSliceLen));
         }
         finally
         {

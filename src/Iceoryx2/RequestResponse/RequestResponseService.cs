@@ -29,11 +29,18 @@ public sealed class RequestResponseService<TRequest, TResponse> : IDisposable
     where TResponse : unmanaged
 {
     private readonly SafeRequestResponseServiceHandle _handle;
+    private readonly ulong? _initialMaxRequestSliceLen;
+    private readonly ulong? _initialMaxResponseSliceLen;
     private bool _disposed;
 
-    internal RequestResponseService(IntPtr handle)
+    internal RequestResponseService(
+        IntPtr handle,
+        ulong? initialMaxRequestSliceLen = null,
+        ulong? initialMaxResponseSliceLen = null)
     {
         _handle = new SafeRequestResponseServiceHandle(handle);
+        _initialMaxRequestSliceLen = initialMaxRequestSliceLen;
+        _initialMaxResponseSliceLen = initialMaxResponseSliceLen;
     }
 
     /// <summary>
@@ -52,6 +59,12 @@ public sealed class RequestResponseService<TRequest, TResponse> : IDisposable
         if (clientBuilderHandle == IntPtr.Zero)
         {
             return Result<Client<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ClientCreationFailed, "no handle returned"));
+        }
+
+        if (_initialMaxRequestSliceLen.HasValue)
+        {
+            iox2_port_factory_client_builder_set_initial_max_slice_len(
+                ref clientBuilderHandle, new UIntPtr(_initialMaxRequestSliceLen.Value));
         }
 
         var result = iox2_port_factory_client_builder_create(
@@ -83,6 +96,12 @@ public sealed class RequestResponseService<TRequest, TResponse> : IDisposable
         if (serverBuilderHandle == IntPtr.Zero)
         {
             return Result<Server<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServerCreationFailed, "no handle returned"));
+        }
+
+        if (_initialMaxResponseSliceLen.HasValue)
+        {
+            iox2_port_factory_server_builder_set_initial_max_slice_len(
+                ref serverBuilderHandle, new UIntPtr(_initialMaxResponseSliceLen.Value));
         }
 
         var result = iox2_port_factory_server_builder_create(

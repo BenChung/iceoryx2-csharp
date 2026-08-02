@@ -33,22 +33,28 @@ class Program
 {
     static void Main(string[] args)
     {
-        if (args.Length == 0 || (args[0] != "client" && args[0] != "server"))
+        switch (args.Length == 0 ? "" : args[0])
         {
-            Console.WriteLine("Usage: RequestResponse [client|server]");
-            Console.WriteLine("");
-            Console.WriteLine("  client - Send requests and receive responses");
-            Console.WriteLine("  server - Receive requests and send responses");
-            return;
-        }
-
-        if (args[0] == "client")
-        {
-            RunClient();
-        }
-        else
-        {
-            RunServer();
+            case "client":
+                RunClient();
+                break;
+            case "server":
+                RunServer();
+                break;
+            case "slice-client":
+                RunSliceClient();
+                break;
+            case "slice-server":
+                RunSliceServer();
+                break;
+            default:
+                Console.WriteLine("Usage: RequestResponse [client|server|slice-client|slice-server]");
+                Console.WriteLine("");
+                Console.WriteLine("  client       - Send requests and receive responses");
+                Console.WriteLine("  server       - Receive requests and send responses");
+                Console.WriteLine("  slice-client - Send variable-length request slices");
+                Console.WriteLine("  slice-server - Reply with variable-length response slices");
+                break;
         }
     }
 
@@ -308,6 +314,128 @@ class Program
 
             // Sleep 100ms between cycles
             Thread.Sleep(100);
+        }
+    }
+
+    private const string SliceServiceName = "My/Funk/SliceServiceName";
+    private const ulong SliceCapacity = 64;
+
+    /// <summary>
+    /// Opens the slice service. Both peers must declare the same dynamic variants, and
+    /// the slice lengths bound what a client may loan as a request and a server as a response.
+    /// </summary>
+    static Iceoryx2.Result<RequestResponseService<TransmissionData, TransmissionData>, Iox2Error> OpenSliceService(Node node)
+    {
+        return node.ServiceBuilder()
+            .RequestResponse<TransmissionData, TransmissionData>()
+            .EnableDynamicPayloads()
+            .InitialMaxSliceLen(SliceCapacity)
+            .Open(SliceServiceName);
+    }
+
+    static void RunSliceClient()
+    {
+        Console.WriteLine("Starting slice client...");
+
+        using var node = NodeBuilder.New()
+            .Name("request_response_slice_client")
+            .Create()
+            .Expect("Failed to create node");
+
+        using var service = OpenSliceService(node).Expect("Failed to open slice service");
+        using var client = service.CreateClient().Expect("Failed to create client");
+
+        Console.WriteLine("Slice client started. Sending variable-length requests...");
+
+        var iteration = 0;
+        while (true)
+        {
+            // Vary the element count each iteration to show the length travelling with the payload.
+            var elementCount = (ulong)(1 + iteration % 5);
+
+            using var request = client.LoanSlice(elementCount).Expect("Failed to loan request slice");
+
+            var payload = request.PayloadAsSpan;
+            for (int i = 0; i < payload.Length; i++)
+            {
+                payload[i] = new TransmissionData { X = iteration, Y = i, Funky = i * 1.5 };
+            }
+
+            Console.WriteLine($"send request slice of {payload.Length} elements ...");
+
+            using var pendingResponse = request.Send().Expect("Failed to send request");
+
+            var response = pendingResponse.TimedReceive(TimeSpan.FromSeconds(2))
+                .Expect("Failed to receive response");
+
+            if (response == null)
+            {
+                Console.WriteLine("  no response within 2s");
+            }
+            else
+            {
+                using (response)
+                {
+                    var received = response.PayloadAsReadOnlySpan;
+                    Console.WriteLine($"  received response slice of {received.Length} elements:");
+                    for (int i = 0; i < received.Length; i++)
+                    {
+                        Console.WriteLine($"    [{i}] x={received[i].X}, y={received[i].Y}, funky={received[i].Funky:F2}");
+                    }
+                }
+            }
+
+            iteration++;
+            Thread.Sleep(1000);
+        }
+    }
+
+    static void RunSliceServer()
+    {
+        Console.WriteLine("Starting slice server...");
+
+        using var node = NodeBuilder.New()
+            .Name("request_response_slice_server")
+            .Create()
+            .Expect("Failed to create node");
+
+        using var service = OpenSliceService(node).Expect("Failed to open slice service");
+        using var server = service.CreateServer().Expect("Failed to create server");
+
+        Console.WriteLine("Slice server ready to receive requests!");
+
+        while (true)
+        {
+            var request = server.Receive().Expect("Failed to receive request");
+            if (request == null)
+            {
+                Thread.Sleep(100);
+                continue;
+            }
+
+            using (request)
+            {
+                var received = request.PayloadAsReadOnlySpan;
+                Console.WriteLine($"received request slice of {received.Length} elements:");
+                for (int i = 0; i < received.Length; i++)
+                {
+                    Console.WriteLine($"  [{i}] x={received[i].X}, y={received[i].Y}, funky={received[i].Funky:F2}");
+                }
+
+                // Reply with twice as many elements, capped at the service's slice capacity.
+                var responseCount = Math.Min((ulong)received.Length * 2, SliceCapacity);
+                using var response = request.LoanResponseSlice(responseCount)
+                    .Expect("Failed to loan response slice");
+
+                var payload = response.PayloadAsSpan;
+                for (int i = 0; i < payload.Length; i++)
+                {
+                    payload[i] = new TransmissionData { X = 5 + i, Y = 6 * i, Funky = 7.77 };
+                }
+
+                Console.WriteLine($"  send response slice of {payload.Length} elements");
+                response.Send().Expect("Failed to send response");
+            }
         }
     }
 }

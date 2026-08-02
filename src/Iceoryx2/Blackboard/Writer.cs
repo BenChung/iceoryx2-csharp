@@ -68,7 +68,7 @@ public sealed class Writer<TKey> : IDisposable
             out var entryHandleMutPtr,
             (IntPtr)keyPtr,
             valueTypeName,
-            valueTypeName.Length,
+            System.Text.Encoding.UTF8.GetByteCount(valueTypeName),
             valueTypeSize,
             valueTypeAlignment);
 

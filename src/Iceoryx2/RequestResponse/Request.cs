@@ -37,7 +37,22 @@ public sealed class Request<TRequest, TResponse> : IDisposable
     }
 
     /// <summary>
+    /// Gets the number of elements in the received request payload.
+    /// </summary>
+    public int Length
+    {
+        get
+        {
+            ThrowIfDisposed();
+
+            iox2_active_request_payload(ref _handle, out _, out var numberOfElements);
+            return (int)numberOfElements;
+        }
+    }
+
+    /// <summary>
     /// Gets the request payload data.
+    /// For single-element requests only (Length == 1); slice requests use <see cref="PayloadAsReadOnlySpan"/>.
     /// </summary>
     public unsafe TRequest Payload
     {
@@ -45,7 +60,7 @@ public sealed class Request<TRequest, TResponse> : IDisposable
         {
             ThrowIfDisposed();
 
-            iox2_active_request_payload(ref _handle, out var payloadPtr, out var payloadLen);
+            iox2_active_request_payload(ref _handle, out var payloadPtr, out _);
 
             if (payloadPtr == IntPtr.Zero)
             {
@@ -57,25 +72,64 @@ public sealed class Request<TRequest, TResponse> : IDisposable
     }
 
     /// <summary>
+    /// Gets the payload as a read-only Span over shared memory, spanning all
+    /// <see cref="Length"/> elements the client sent.
+    /// </summary>
+    public unsafe ReadOnlySpan<TRequest> PayloadAsReadOnlySpan
+    {
+        get
+        {
+            ThrowIfDisposed();
+
+            iox2_active_request_payload(ref _handle, out var payloadPtr, out var numberOfElements);
+
+            if (payloadPtr == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Failed to get request payload");
+            }
+
+            return new ReadOnlySpan<TRequest>(payloadPtr.ToPointer(), (int)numberOfElements);
+        }
+    }
+
+    /// <summary>
     /// Loans a response message to send back to the client.
     /// </summary>
     /// <returns>A Result containing the response message or an error.</returns>
     public Result<ResponseMut<TResponse>, Iox2Error> LoanResponse()
     {
+        return LoanResponseSlice(1);
+    }
+
+    /// <summary>
+    /// Loans a response slice of <paramref name="numberOfElements"/> elements to send back
+    /// to the client.
+    /// Requires the service to be opened with <c>EnableDynamicPayloads()</c> or
+    /// <c>EnableDynamicResponsePayloads()</c>, and the element count to stay within the
+    /// service's <c>InitialMaxResponseSliceLen</c>.
+    /// </summary>
+    /// <param name="numberOfElements">The number of elements to allocate in the slice.</param>
+    /// <returns>A Result containing the response message or an error.</returns>
+    public Result<ResponseMut<TResponse>, Iox2Error> LoanResponseSlice(ulong numberOfElements)
+    {
         ThrowIfDisposed();
+
+        if (numberOfElements == 0)
+            throw new ArgumentException("Number of elements must be greater than 0", nameof(numberOfElements));
 
         var result = iox2_active_request_loan_slice_uninit(
             ref _handle,
             IntPtr.Zero,
             out var responseHandle,
-            new UIntPtr(1));
+            new UIntPtr(numberOfElements));
 
         if (result != IOX2_OK)
         {
             return Result<ResponseMut<TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ResponseLoanFailed, result, iox2_loan_error_string));
         }
 
-        return Result<ResponseMut<TResponse>, Iox2Error>.Ok(new ResponseMut<TResponse>(responseHandle));
+        return Result<ResponseMut<TResponse>, Iox2Error>.Ok(
+            new ResponseMut<TResponse>(responseHandle, (int)numberOfElements));
     }
 
     /// <summary>
@@ -88,11 +142,36 @@ public sealed class Request<TRequest, TResponse> : IDisposable
     {
         ThrowIfDisposed();
 
+        return SendCopyResponseElements(&response, 1);
+    }
+
+    /// <summary>
+    /// Sends a response slice by copying the provided elements.
+    /// This is a convenience method that loans, writes, and sends in one operation, with
+    /// the same service and slice-length requirements as <see cref="LoanResponseSlice"/>.
+    /// </summary>
+    /// <param name="response">The response elements to send.</param>
+    /// <returns>A Result indicating success or an error.</returns>
+    public unsafe Result<Unit, Iox2Error> SendCopyResponse(ReadOnlySpan<TResponse> response)
+    {
+        ThrowIfDisposed();
+
+        if (response.IsEmpty)
+            throw new ArgumentException("Response slice must contain at least one element", nameof(response));
+
+        fixed (TResponse* dataPtr = response)
+        {
+            return SendCopyResponseElements(dataPtr, response.Length);
+        }
+    }
+
+    private unsafe Result<Unit, Iox2Error> SendCopyResponseElements(TResponse* dataPtr, int numberOfElements)
+    {
         var result = iox2_active_request_send_copy(
             ref _handle,
-            new IntPtr(&response),
+            new IntPtr(dataPtr),
             new UIntPtr((uint)Marshal.SizeOf<TResponse>()),
-            new UIntPtr(1));
+            new UIntPtr((uint)numberOfElements));
 
         if (result != IOX2_OK)
         {

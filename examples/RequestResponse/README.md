@@ -86,6 +86,16 @@ dotnet run -- server
 dotnet run -- client
 ```
 
+### Slice mode
+
+`slice-server` and `slice-client` run the same pattern over variable-length
+payloads on a separate service:
+
+```sh
+dotnet run -- slice-server   # terminal 1
+dotnet run -- slice-client   # terminal 2
+```
+
 Feel free to run multiple instances of the client or server processes
 simultaneously to explore how iceoryx2 handles request-response communication
 efficiently.
@@ -126,9 +136,72 @@ send request 2 ...
   received response 3: x=7, y=12, funky=7.77
 ```
 
+## Variable-Length Payloads
+
+Requests and responses can each carry a slice whose element count is chosen per
+message. Declare the dynamic variants on the service and bound how many elements
+a port may loan:
+
+```csharp
+using var service = node.ServiceBuilder()
+    .RequestResponse<TransmissionData, TransmissionData>()
+    .EnableDynamicPayloads()   // both directions carry slices
+    .InitialMaxSliceLen(64)    // ceiling for both ports
+    .Open("My/Funk/SliceServiceName")
+    .Unwrap();
+```
+
+Every participant must declare the same variants — a peer opening the service
+with fixed-size payloads is rejected.
+
+The client loans a request slice and writes through a `Span<T>` into shared
+memory:
+
+```csharp
+using var request = client.LoanSlice(elementCount).Unwrap();
+var payload = request.PayloadAsSpan;
+for (int i = 0; i < payload.Length; i++)
+{
+    payload[i] = new TransmissionData { X = i, Y = i, Funky = i * 1.5 };
+}
+using var pendingResponse = request.Send().Unwrap();
+```
+
+The server reads the request through a `ReadOnlySpan<T>` and replies with an
+independently sized slice:
+
+```csharp
+var received = request.PayloadAsReadOnlySpan;
+using var response = request.LoanResponseSlice((ulong)received.Length * 2).Unwrap();
+var payload = response.PayloadAsSpan;
+// ... fill payload ...
+response.Send().Unwrap();
+```
+
+`Length` on a received `Request` or `Response` reports the element count the
+sender chose, so the receiver never has to be told the size out of band.
+
+The two directions are configured independently:
+
+| Method | Effect |
+| ------ | ------ |
+| `EnableDynamicPayloads()` | slices in both directions |
+| `EnableDynamicRequestPayloads()` | variable-length request, fixed-size response |
+| `EnableDynamicResponsePayloads()` | fixed-size request, variable-length response |
+| `InitialMaxSliceLen(n)` | element ceiling for both ports |
+| `InitialMaxRequestSliceLen(n)` | element ceiling for `Client.LoanSlice()` |
+| `InitialMaxResponseSliceLen(n)` | element ceiling for `Request.LoanResponseSlice()` |
+
+Loaning past the configured ceiling returns a loan error rather than throwing.
+`Client.SendCopy(ReadOnlySpan<T>)` and
+`Request.SendCopyResponse(ReadOnlySpan<T>)` send a slice without the explicit
+loan lifecycle.
+
 ## Key Features Demonstrated
 
 * **Request-Response Pattern**: Client-server RPC communication
+* **Variable-Length Payloads**: `LoanSlice()` / `LoanResponseSlice()` with
+  `Span<T>` accessors over shared memory
 * **Streaming Responses**: Server can send multiple responses per request
 * **Zero-Copy API**: Using `Loan()` for efficient memory sharing
 * **Copy API**: Using `SendCopy()` and `SendCopyResponse()` for convenience
