@@ -172,7 +172,7 @@ public sealed class EventServiceBuilder
         }
         catch (Exception e)
         {
-            return Result<EventService, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.EventServiceCreationFailed, e.ToString()));
+            return Result<EventService, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.EventServiceCreationFailed, e));
         }
     }
 
@@ -271,7 +271,7 @@ public sealed class EventServiceBuilder
         }
         catch (Exception e)
         {
-            return Result<EventService, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.EventServiceCreationFailed, e.ToString()));
+            return Result<EventService, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.EventServiceCreationFailed, e));
         }
     }
 }

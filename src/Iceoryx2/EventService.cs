@@ -77,7 +77,7 @@ public sealed class EventService : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Notifier, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.NotifierCreationFailed, e.ToString()));
+            return Result<Notifier, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.NotifierCreationFailed, e));
         }
     }
 
@@ -118,7 +118,7 @@ public sealed class EventService : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Listener, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ListenerCreationFailed, e.ToString()));
+            return Result<Listener, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.ListenerCreationFailed, e));
         }
     }
 

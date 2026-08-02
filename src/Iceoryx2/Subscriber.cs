@@ -75,7 +75,7 @@ public sealed class Subscriber : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Sample<T>?, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ReceiveFailed, e.ToString()));
+            return Result<Sample<T>?, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.ReceiveFailed, e));
         }
     }
 

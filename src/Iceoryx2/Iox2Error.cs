@@ -131,6 +131,14 @@ public abstract class Iox2Error
         return FromKind(kind, detail);
     }
 
+    /// <summary>
+    /// Creates the error for an exception that escaped a native interaction.
+    /// The single policy point for how much of the exception the error
+    /// carries.
+    /// </summary>
+    internal static Iox2Error FromException(Iox2ErrorKind kind, Exception exception) =>
+        FromKind(kind, exception.ToString());
+
     // Backward compatibility: Static error instances
 
     /// <summary>Gets a <see cref="NodeCreationError"/> instance for backward compatibility.</summary>

@@ -114,7 +114,7 @@ public sealed class NodeBuilder
         }
         catch (Exception e)
         {
-            return Result<Node, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.NodeCreationFailed, e.ToString()));
+            return Result<Node, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.NodeCreationFailed, e));
         }
     }
 }

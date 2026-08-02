@@ -86,7 +86,7 @@ public sealed class Service : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Publisher, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.PublisherCreationFailed, e.ToString()));
+            return Result<Publisher, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.PublisherCreationFailed, e));
         }
     }
 
@@ -125,7 +125,7 @@ public sealed class Service : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SubscriberCreationFailed, e.ToString()));
+            return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.SubscriberCreationFailed, e));
         }
     }
 

@@ -83,7 +83,7 @@ public sealed class SubscriberBuilder
         }
         catch (Exception e)
         {
-            return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SubscriberCreationFailed, e.ToString()));
+            return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromException(Iox2ErrorKind.SubscriberCreationFailed, e));
         }
     }
 }
