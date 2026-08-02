@@ -59,51 +59,54 @@ public sealed class NodeBuilder
     {
         try
         {
-            // Create node builder with proper struct
-            var builderStruct = new Native.Iox2NativeMethods.iox2_node_builder_t();
-            var builderHandle = Native.Iox2NativeMethods.iox2_node_builder_new(ref builderStruct);
-
-            if (builderHandle == IntPtr.Zero)
-                return Result<Node, Iox2Error>.Err(Iox2Error.NodeCreationFailed);
-
-            // Set node name if provided
-            if (!string.IsNullOrEmpty(_name))
+            lock (Native.Iox2NativeMethods.NodeLifetimeLock)
             {
-                var result = Native.Iox2NativeMethods.iox2_node_name_new(
-                    IntPtr.Zero,  // NULL - let C allocate the struct
-                    _name,
-                    System.Text.Encoding.UTF8.GetByteCount(_name),
-                    out var nodeNameHandle);
+                // Create node builder with proper struct
+                var builderStruct = new Native.Iox2NativeMethods.iox2_node_builder_t();
+                var builderHandle = Native.Iox2NativeMethods.iox2_node_builder_new(ref builderStruct);
 
-                if (result == Native.Iox2NativeMethods.IOX2_OK)
+                if (builderHandle == IntPtr.Zero)
+                    return Result<Node, Iox2Error>.Err(Iox2Error.NodeCreationFailed);
+
+                // Set node name if provided
+                if (!string.IsNullOrEmpty(_name))
                 {
-                    var nodeNamePtr = Native.Iox2NativeMethods.iox2_cast_node_name_ptr(nodeNameHandle);
-                    Native.Iox2NativeMethods.iox2_node_builder_set_name(ref builderHandle, nodeNamePtr);
-                    Native.Iox2NativeMethods.iox2_node_name_drop(nodeNameHandle);
+                    var result = Native.Iox2NativeMethods.iox2_node_name_new(
+                        IntPtr.Zero,  // NULL - let C allocate the struct
+                        _name,
+                        System.Text.Encoding.UTF8.GetByteCount(_name),
+                        out var nodeNameHandle);
+
+                    if (result == Native.Iox2NativeMethods.IOX2_OK)
+                    {
+                        var nodeNamePtr = Native.Iox2NativeMethods.iox2_cast_node_name_ptr(nodeNameHandle);
+                        Native.Iox2NativeMethods.iox2_node_builder_set_name(ref builderHandle, nodeNamePtr);
+                        Native.Iox2NativeMethods.iox2_node_name_drop(nodeNameHandle);
+                    }
                 }
+
+                if (_config != null)
+                {
+                    var configHandle = _config.Handle.DangerousGetHandle();
+                    Native.Iox2NativeMethods.iox2_node_builder_set_config(ref builderHandle, ref configHandle);
+                }
+
+                // Create the node - pass IntPtr.Zero to let C FFI allocate the struct
+                var serviceType = Native.Iox2NativeMethods.iox2_service_type_e.IPC;
+                var createResult = Native.Iox2NativeMethods.iox2_node_builder_create(
+                    builderHandle,
+                    IntPtr.Zero,  // NULL - let C allocate the struct on heap
+                    serviceType,
+                    out var nodeHandle);
+
+                if (createResult != Native.Iox2NativeMethods.IOX2_OK || nodeHandle == IntPtr.Zero)
+                    return Result<Node, Iox2Error>.Err(Iox2Error.NodeCreationFailed);
+
+                var handle = new SafeNodeHandle(nodeHandle);
+                var node = new Node(handle, serviceType);
+
+                return Result<Node, Iox2Error>.Ok(node);
             }
-
-            if (_config != null)
-            {
-                var configHandle = _config.Handle.DangerousGetHandle();
-                Native.Iox2NativeMethods.iox2_node_builder_set_config(ref builderHandle, ref configHandle);
-            }
-
-            // Create the node - pass IntPtr.Zero to let C FFI allocate the struct
-            var serviceType = Native.Iox2NativeMethods.iox2_service_type_e.IPC;
-            var createResult = Native.Iox2NativeMethods.iox2_node_builder_create(
-                builderHandle,
-                IntPtr.Zero,  // NULL - let C allocate the struct on heap
-                serviceType,
-                out var nodeHandle);
-
-            if (createResult != Native.Iox2NativeMethods.IOX2_OK || nodeHandle == IntPtr.Zero)
-                return Result<Node, Iox2Error>.Err(Iox2Error.NodeCreationFailed);
-
-            var handle = new SafeNodeHandle(nodeHandle);
-            var node = new Node(handle, serviceType);
-
-            return Result<Node, Iox2Error>.Ok(node);
         }
         catch (Exception)
         {

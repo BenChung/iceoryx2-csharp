@@ -29,6 +29,11 @@ internal static partial class Iox2NativeMethods
 {
     private const string LibraryName = "iceoryx2_ffi_c";
 
+    // iceoryx2 v0.9.3 can abort the process when concurrent node creations and
+    // drops run their cleanup scans over the same namespace on Windows, so all
+    // node create/drop calls are serialized through this lock.
+    internal static readonly object NodeLifetimeLock = new object();
+
     // ========================================
     // Cross-Platform Library Loading
     // ========================================

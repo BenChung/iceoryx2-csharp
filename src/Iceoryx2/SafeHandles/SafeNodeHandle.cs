@@ -31,7 +31,10 @@ internal sealed class SafeNodeHandle : SafeIox2Handle
     {
         if (!IsInvalid && handle != IntPtr.Zero)
         {
-            Native.Iox2NativeMethods.iox2_node_drop(handle);
+            lock (Native.Iox2NativeMethods.NodeLifetimeLock)
+            {
+                Native.Iox2NativeMethods.iox2_node_drop(handle);
+            }
             return true;
         }
         return false;
