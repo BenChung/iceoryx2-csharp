@@ -109,33 +109,26 @@ public sealed class Publisher : IDisposable
     /// Send a copy of the provided managed struct via the native send-copy path.
     /// This is a fallback that avoids the loan/send lifecycle and is useful for complex types.
     /// </summary>
-    public Result<Unit, Iox2Error> SendCopy<T>(T value) where T : unmanaged
+    public unsafe Result<Unit, Iox2Error> SendCopy<T>(T value) where T : unmanaged
     {
         ThrowIfDisposed();
 
         try
         {
             var publisherHandle = _handle.DangerousGetHandle();
-            var size = (ulong)Marshal.SizeOf<T>();
-            var tmp = Marshal.AllocHGlobal((int)size);
-            try
-            {
-                Marshal.StructureToPtr(value, tmp, false);
-                var result = Native.Iox2NativeMethods.iox2_publisher_send_copy(
-                    ref publisherHandle,
-                    tmp,
-                    (UIntPtr)size,
-                    IntPtr.Zero);
 
-                if (result != Native.Iox2NativeMethods.IOX2_OK)
-                    return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SendFailed, result, Native.Iox2NativeMethods.iox2_send_error_string));
+            // sizeof, not Marshal.SizeOf: the service registered the unmanaged size and
+            // the receiving side reads that layout back.
+            var result = Native.Iox2NativeMethods.iox2_publisher_send_copy(
+                ref publisherHandle,
+                new IntPtr(&value),
+                (UIntPtr)sizeof(T),
+                IntPtr.Zero);
 
-                return Result<Unit, Iox2Error>.Ok(Unit.Value);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(tmp);
-            }
+            if (result != Native.Iox2NativeMethods.IOX2_OK)
+                return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SendFailed, result, Native.Iox2NativeMethods.iox2_send_error_string));
+
+            return Result<Unit, Iox2Error>.Ok(Unit.Value);
         }
         catch (Exception e)
         {

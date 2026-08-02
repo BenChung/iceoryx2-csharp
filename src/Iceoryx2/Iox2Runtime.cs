@@ -11,6 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -51,7 +52,14 @@ public static class Iox2Runtime
     /// </summary>
     public static void Prelink()
     {
-        Marshal.PrelinkAll(typeof(Native.Iox2NativeMethods));
+        // Marshal.PrelinkAll only visits public methods; every binding here is
+        // internal, so walk them explicitly.
+        foreach (var method in typeof(Native.Iox2NativeMethods).GetMethods(
+                     BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static))
+        {
+            if ((method.Attributes & MethodAttributes.PinvokeImpl) != 0)
+                Marshal.Prelink(method);
+        }
     }
 
     /// <summary>

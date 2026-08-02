@@ -92,25 +92,10 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
             if (payloadPtr == IntPtr.Zero)
                 throw new InvalidOperationException("Failed to get sample payload");
 
-            // Ensure we don't overwrite memory unexpectedly. Marshal the structure into a temporary
-            // unmanaged buffer and then copy the bytes into the payload pointer returned by native.
-            var structSize = Marshal.SizeOf<T>();
-            // We loaned exactly 1 element, so available bytes = structSize
-            var availableBytes = (ulong)structSize;
-
-            var tmp = Marshal.AllocHGlobal(structSize);
-            try
-            {
-                Marshal.StructureToPtr(value, tmp, false);
-                unsafe
-                {
-                    Buffer.MemoryCopy(tmp.ToPointer(), payloadPtr.ToPointer(), (long)availableBytes, (long)structSize);
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(tmp);
-            }
+            // Write the unmanaged representation the service registered and the span
+            // accessors read. Marshalled layout can differ (bool is 1 byte here, 4 when
+            // marshalled) and would disagree with the registered payload size.
+            *(T*)payloadPtr = value;
         }
     }
 
@@ -250,16 +235,17 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
         {
             var sampleHandle = _handle.DangerousGetHandle();
 
+            // Native frees the sample struct before it attempts delivery, so the handle is
+            // spent on the failure path too. Relinquish it before inspecting the result.
+            _handle.SetHandleAsInvalid();
+            _disposed = true;
+
             var result = Native.Iox2NativeMethods.iox2_sample_mut_send(
                 sampleHandle,
                 IntPtr.Zero);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
                 return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SendFailed, result, Native.Iox2NativeMethods.iox2_send_error_string));
-
-            // The handle is consumed by send
-            _handle.SetHandleAsInvalid();
-            _disposed = true;
 
             return Result<Unit, Iox2Error>.Ok(Unit.Value);
         }

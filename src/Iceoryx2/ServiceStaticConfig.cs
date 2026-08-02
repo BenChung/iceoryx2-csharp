@@ -95,35 +95,6 @@ public class ServiceStaticConfig
         // Pattern-specific configs are null when using this simplified constructor
     }
 
-    internal ServiceStaticConfig(ref Iox2NativeMethods.iox2_static_config_t native)
-    {
-        // Extract ID (fixed-size byte array)
-        Id = ExtractString(native.id);
-
-        // Extract Name (fixed-size byte array)
-        Name = ExtractString(native.name);
-
-        // Map messaging pattern
-        MessagingPattern = (MessagingPattern)native.messaging_pattern;
-
-        // Extract pattern-specific configuration based on messaging pattern
-        switch (MessagingPattern)
-        {
-            case MessagingPattern.Event:
-                EventConfig = new EventStaticConfig(ref native.details.@event);
-                break;
-            case MessagingPattern.PublishSubscribe:
-                PublishSubscribeConfig = new PublishSubscribeStaticConfig(ref native.details.publish_subscribe);
-                break;
-            case MessagingPattern.RequestResponse:
-                RequestResponseConfig = new RequestResponseStaticConfig(ref native.details.request_response);
-                break;
-            case MessagingPattern.Blackboard:
-                BlackboardConfig = new BlackboardStaticConfig(ref native.details.blackboard);
-                break;
-        }
-    }
-
     private static string ExtractString(byte[] bytes)
     {
         // Find the null terminator

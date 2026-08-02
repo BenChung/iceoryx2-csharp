@@ -114,10 +114,12 @@ public sealed class Client<TRequest, TResponse> : IDisposable
     private unsafe Result<PendingResponse<TResponse>, Iox2Error> SendCopyElements(TRequest* dataPtr, int numberOfElements)
     {
         var handlePtr = _handle.DangerousGetHandle();
+        // sizeof, not Marshal.SizeOf: the service registered the unmanaged size and the
+        // server reads that layout back.
         var result = iox2_client_send_copy(
             ref handlePtr,
             new IntPtr(dataPtr),
-            new UIntPtr((uint)Marshal.SizeOf<TRequest>()),
+            new UIntPtr((uint)sizeof(TRequest)),
             new UIntPtr((uint)numberOfElements),
             IntPtr.Zero,
             out var pendingResponseHandle);

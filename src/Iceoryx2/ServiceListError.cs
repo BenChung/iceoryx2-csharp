@@ -62,6 +62,13 @@ public sealed class ServiceListError : Iox2Error
     /// Creates a ServiceListError for interrupts.
     /// </summary>
     public static ServiceListError Interrupt => new(ServiceListErrorKind.Interrupt);
+
+    /// <summary>
+    /// Creates a ServiceListError for a native error code with no mapped kind.
+    /// </summary>
+    /// <param name="details">The native error code and reason.</param>
+    internal static ServiceListError FromUnmappedCode(string? details) =>
+        new((ServiceListErrorKind)(-1), details);
 }
 
 /// <summary>

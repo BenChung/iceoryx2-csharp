@@ -167,10 +167,12 @@ public sealed class Request<TRequest, TResponse> : IDisposable
 
     private unsafe Result<Unit, Iox2Error> SendCopyResponseElements(TResponse* dataPtr, int numberOfElements)
     {
+        // sizeof, not Marshal.SizeOf: the service registered the unmanaged size and the
+        // client reads that layout back.
         var result = iox2_active_request_send_copy(
             ref _handle,
             new IntPtr(dataPtr),
-            new UIntPtr((uint)Marshal.SizeOf<TResponse>()),
+            new UIntPtr((uint)sizeof(TResponse)),
             new UIntPtr((uint)numberOfElements));
 
         if (result != IOX2_OK)

@@ -174,7 +174,10 @@ public sealed class PendingResponse<TResponse> : IDisposable
             var result = Receive();
             if (!result.IsOk)
             {
-                return Result<Response<TResponse>, Iox2Error>.Err(Iox2Error.ResponseReceiveFailed);
+                // Carry the original error: a NativePanic must not be flattened away.
+                return result.Match(
+                    _ => Result<Response<TResponse>, Iox2Error>.Err(Iox2Error.ResponseReceiveFailed),
+                    err => Result<Response<TResponse>, Iox2Error>.Err(err));
             }
 
             var response = result.Unwrap();
@@ -203,7 +206,10 @@ public sealed class PendingResponse<TResponse> : IDisposable
             var result = Receive();
             if (!result.IsOk)
             {
-                return Result<Response<TResponse>, Iox2Error>.Err(Iox2Error.ResponseReceiveFailed);
+                // Carry the original error: a NativePanic must not be flattened away.
+                return result.Match(
+                    _ => Result<Response<TResponse>, Iox2Error>.Err(Iox2Error.ResponseReceiveFailed),
+                    err => Result<Response<TResponse>, Iox2Error>.Err(err));
             }
 
             var response = result.Unwrap();

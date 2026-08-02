@@ -70,6 +70,8 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
     /// <summary>
     /// Loans an uninitialized entry value for in-place construction.
     /// This is useful when you want to construct the value directly in shared memory.
+    /// Consumes this handle: the returned entry value owns the entry from here on, and
+    /// further calls on this instance throw <see cref="ObjectDisposedException"/>.
     /// </summary>
     /// <returns>A Result containing the loaned entry value or an error.</returns>
     public unsafe Result<EntryValueUninit<TKey, TValue>, Iox2Error> LoanUninit()
@@ -80,6 +82,12 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
         var valueAlignment = BlackboardHelpers.GetAlignment<TValue>(valueSize);
 
         var handlePtr = _handle.DangerousGetHandle();
+
+        // Native frees the entry-handle struct and moves its contents into the returned
+        // entry value, so this handle is spent whatever the outcome.
+        _handle.SetHandleAsInvalid();
+        _disposed = true;
+
         // Note: iox2_entry_handle_mut_loan_uninit returns void
         iox2_entry_handle_mut_loan_uninit(
             handlePtr,

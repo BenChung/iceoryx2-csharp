@@ -108,16 +108,18 @@ public sealed class ResponseMut<TResponse> : IDisposable
     {
         ThrowIfDisposed();
 
-        var result = iox2_response_mut_send(_handle);
+        // Native frees the response struct before it attempts delivery, so the handle is
+        // spent on the failure path too. Relinquish it before inspecting the result.
+        var handle = _handle;
+        _disposed = true;
+        _handle = IntPtr.Zero;
+
+        var result = iox2_response_mut_send(handle);
 
         if (result != IOX2_OK)
         {
             return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ResponseSendFailed, result, iox2_send_error_string));
         }
-
-        // Mark as disposed since the handle is consumed by send
-        _disposed = true;
-        _handle = IntPtr.Zero;
 
         return Result<Unit, Iox2Error>.Ok(new Unit());
     }

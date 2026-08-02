@@ -81,6 +81,10 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
     /// </summary>
     /// <param name="serviceName">The name of the service.</param>
     /// <returns>A Result containing the blackboard service or an error.</returns>
+    /// <remarks>
+    /// Key equality is fixed by the process that created the service, so the comparer this
+    /// builder was constructed with applies to <c>Create</c> only.
+    /// </remarks>
     /// <exception cref="ArgumentNullException">Thrown when serviceName is null.</exception>
     /// <exception cref="ArgumentException">Thrown when serviceName is empty or whitespace.</exception>
     public unsafe Result<BlackboardService<TKey>, Iox2Error> Open(string serviceName)
@@ -264,7 +268,12 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
                 return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, keyResult));
             }
 
-            // Set key comparison function
+            // Set key comparison function. A previous attempt's root is dead once we
+            // replace the delegate, so release it rather than orphaning it.
+            if (_keyComparerHandle.IsAllocated)
+            {
+                _keyComparerHandle.Free();
+            }
             _nativeKeyComparer = CreateNativeKeyComparer();
             _keyComparerHandle = GCHandle.Alloc(_nativeKeyComparer);
             iox2_service_builder_blackboard_creator_set_key_eq_comparison_function(
@@ -319,8 +328,13 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
                     return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, result, iox2_blackboard_create_error_string));
                 }
 
+                // The service keeps invoking the comparer through the pointer we just
+                // handed native, so it takes over the root and outlives this builder.
+                var comparerRoot = _keyComparerHandle;
+                _keyComparerHandle = default;
+
                 return Result<BlackboardService<TKey>, Iox2Error>.Ok(
-                    new BlackboardService<TKey>(portFactoryHandle, _keyComparer));
+                    new BlackboardService<TKey>(portFactoryHandle, _keyComparer, comparerRoot));
             }
             finally
             {
@@ -341,21 +355,36 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
     {
         return (lhs, rhs) =>
         {
-            // Use unsafe pointer dereference instead of Marshal.PtrToStructure
-            // (Marshal.PtrToStructure doesn't work with enums and some value types)
-            var leftKey = *(TKey*)lhs;
-            var rightKey = *(TKey*)rhs;
-            return _keyComparer(leftKey, rightKey);
+            try
+            {
+                // Use unsafe pointer dereference instead of Marshal.PtrToStructure
+                // (Marshal.PtrToStructure doesn't work with enums and some value types)
+                var leftKey = *(TKey*)lhs;
+                var rightKey = *(TKey*)rhs;
+                return _keyComparer(leftKey, rightKey);
+            }
+            catch
+            {
+                // An exception unwinding into the Rust caller is undefined behavior.
+                // Reporting "not equal" degrades to a missed lookup instead.
+                return false;
+            }
         };
     }
 
     /// <summary>
     /// Releases all resources used by the <see cref="BlackboardServiceBuilder{TKey}"/>.
     /// </summary>
+    /// <remarks>
+    /// A service created by this builder owns the key-comparer root from creation onward,
+    /// so disposing the builder leaves the comparer callable.
+    /// </remarks>
     public void Dispose()
     {
         if (!_disposed)
         {
+            // A successful Create() transferred the root to the service; anything still
+            // held here belongs to an attempt that never produced one.
             if (_keyComparerHandle.IsAllocated)
             {
                 _keyComparerHandle.Free();

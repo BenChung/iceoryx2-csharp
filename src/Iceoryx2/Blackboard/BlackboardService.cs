@@ -29,12 +29,20 @@ public sealed class BlackboardService<TKey> : IDisposable
 {
     private readonly SafeBlackboardServiceHandle _handle;
     private readonly Func<TKey, TKey, bool> _keyComparer;
+    // Roots the delegate behind the key-comparison function pointer held by a service
+    // this process created. Default (unallocated) for an opened service, whose comparer
+    // lives in the creating process.
+    private System.Runtime.InteropServices.GCHandle _keyComparerRoot;
     private bool _disposed;
 
-    internal BlackboardService(IntPtr handle, Func<TKey, TKey, bool> keyComparer)
+    internal BlackboardService(
+        IntPtr handle,
+        Func<TKey, TKey, bool> keyComparer,
+        System.Runtime.InteropServices.GCHandle keyComparerRoot = default)
     {
         _handle = new SafeBlackboardServiceHandle(handle);
         _keyComparer = keyComparer;
+        _keyComparerRoot = keyComparerRoot;
     }
 
     /// <summary>
@@ -117,6 +125,11 @@ public sealed class BlackboardService<TKey> : IDisposable
         if (!_disposed)
         {
             _handle?.Dispose();
+            // Released after the service, so nothing native can still reach the comparer.
+            if (_keyComparerRoot.IsAllocated)
+            {
+                _keyComparerRoot.Free();
+            }
             _disposed = true;
         }
     }

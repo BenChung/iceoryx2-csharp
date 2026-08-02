@@ -49,14 +49,10 @@ public sealed class Subscriber : IDisposable
                 IntPtr.Zero,  // NULL - let C allocate the struct
                 out var sampleHandle);
 
-            // No sample available is not an error
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-            {
-                if (sampleHandle == IntPtr.Zero)
-                    return Result<Sample<T>?, Iox2Error>.Ok(null);
-                return Result<Sample<T>?, Iox2Error>.Err(Iox2Error.ReceiveFailed);
-            }
+                return Result<Sample<T>?, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ReceiveFailed, result, Native.Iox2NativeMethods.iox2_receive_error_string));
 
+            // Success with no handle means the queue was empty, which is not an error.
             if (sampleHandle == IntPtr.Zero)
                 return Result<Sample<T>?, Iox2Error>.Ok(null);
 
@@ -132,7 +128,10 @@ public sealed class Subscriber : IDisposable
             var result = Receive<T>();
             if (!result.IsOk)
             {
-                return Result<Sample<T>, Iox2Error>.Err(Iox2Error.ReceiveFailed);
+                // Carry the original error: a NativePanic must not be flattened away.
+                return result.Match(
+                    _ => Result<Sample<T>, Iox2Error>.Err(Iox2Error.ReceiveFailed),
+                    err => Result<Sample<T>, Iox2Error>.Err(err));
             }
 
             var sample = result.Unwrap();

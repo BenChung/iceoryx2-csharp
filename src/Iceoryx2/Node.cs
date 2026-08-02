@@ -57,18 +57,35 @@ public sealed class Node : IDisposable
         _serviceType = serviceType;
     }
 
+    // repr(C) pads the id+name char run out to the alignment of the 4-byte
+    // messaging_pattern enum that follows it, so the offset is not id + name.
+    private const int MessagingPatternOffset =
+        (Iox2NativeMethods.IOX2_SERVICE_ID_LENGTH + Iox2NativeMethods.IOX2_SERVICE_NAME_LENGTH + 3) & ~3;
+
+    /// <summary>
+    /// Collects the discovery callback's results plus any failure it hit. An exception
+    /// must not unwind into the Rust caller, so the callback records it here and
+    /// <see cref="List"/> reports it rather than returning a silently truncated list.
+    /// </summary>
+    private sealed class ServiceListContext
+    {
+        public readonly List<ServiceStaticConfig> Services = new();
+        public Exception? Failure;
+    }
+
     private static Iox2NativeMethods.iox2_callback_progression_e ServiceListCallback(IntPtr configPtr, IntPtr context)
     {
+        ServiceListContext? ctx = null;
         try
         {
-            var list = CallbackContext.Peek<List<ServiceStaticConfig>>(context);
-            if (list is null || configPtr == IntPtr.Zero)
+            ctx = CallbackContext.Peek<ServiceListContext>(context);
+            if (ctx is null || configPtr == IntPtr.Zero)
             {
                 return Iox2NativeMethods.iox2_callback_progression_e.STOP;
             }
 
-            // Read the basic fields directly from memory without creating the full struct
-            // to avoid issues with the union in iox2_static_config_t.
+            // Read the fields directly at their native offsets rather than marshalling
+            // iox2_static_config_t, whose trailing details union has no valid C# mirror.
             byte[] id = new byte[Iox2NativeMethods.IOX2_SERVICE_ID_LENGTH];
             byte[] name = new byte[Iox2NativeMethods.IOX2_SERVICE_NAME_LENGTH];
 
@@ -79,22 +96,19 @@ public sealed class Node : IDisposable
             IntPtr namePtr = IntPtr.Add(configPtr, Iox2NativeMethods.IOX2_SERVICE_ID_LENGTH);
             Marshal.Copy(namePtr, name, 0, Iox2NativeMethods.IOX2_SERVICE_NAME_LENGTH);
 
-            // Read the messaging pattern (offset by id + name).
-            IntPtr patternPtr = IntPtr.Add(configPtr, Iox2NativeMethods.IOX2_SERVICE_ID_LENGTH + Iox2NativeMethods.IOX2_SERVICE_NAME_LENGTH);
+            // Read the messaging pattern.
+            IntPtr patternPtr = IntPtr.Add(configPtr, MessagingPatternOffset);
             var messagingPattern = (Iox2NativeMethods.iox2_messaging_pattern_e)Marshal.ReadInt32(patternPtr);
 
-            // Create a simplified service config without the problematic union.
-            list.Add(new ServiceStaticConfig(id, name, messagingPattern));
+            ctx.Services.Add(new ServiceStaticConfig(id, name, messagingPattern));
             return Iox2NativeMethods.iox2_callback_progression_e.CONTINUE;
         }
         catch (Exception ex)
         {
-            // Internal marshalling code — surface diagnostics on stderr so
-            // failures here are debuggable. Distinct from the WaitSet
-            // trampolines, which intentionally swallow user-callback
-            // exceptions at the FFI boundary.
-            Console.Error.WriteLine($"Error in service list callback: {ex.Message}");
-            Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
+            // Never let this unwind into the Rust caller. Record it so List() can fail
+            // loudly; a swallowed failure here reads as "no services exist".
+            if (ctx != null)
+                ctx.Failure ??= ex;
             return Iox2NativeMethods.iox2_callback_progression_e.STOP;
         }
     }
@@ -172,8 +186,8 @@ public sealed class Node : IDisposable
     {
         ThrowIfDisposed();
 
-        var services = new List<ServiceStaticConfig>();
-        var contextPtr = CallbackContext.Pin(services);
+        var listContext = new ServiceListContext();
+        var contextPtr = CallbackContext.Pin(listContext);
 
         try
         {
@@ -198,11 +212,16 @@ public sealed class Node : IDisposable
                 return Result<List<ServiceStaticConfig>, ServiceListError>.Err(error);
             }
 
-            return Result<List<ServiceStaticConfig>, ServiceListError>.Ok(services);
+            // The native call succeeded, but the callback stops the iteration when it
+            // fails, so an unreported failure here would masquerade as an empty system.
+            if (listContext.Failure != null)
+                return Result<List<ServiceStaticConfig>, ServiceListError>.Err(ServiceListError.InternalError);
+
+            return Result<List<ServiceStaticConfig>, ServiceListError>.Ok(listContext.Services);
         }
         finally
         {
-            CallbackContext.Unpin<List<ServiceStaticConfig>>(contextPtr);
+            CallbackContext.Unpin<ServiceListContext>(contextPtr);
         }
     }
 

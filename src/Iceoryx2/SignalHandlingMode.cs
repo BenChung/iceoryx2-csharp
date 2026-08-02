@@ -13,8 +13,12 @@
 namespace Iceoryx2;
 
 /// <summary>
-/// Defines how the WaitSet handles POSIX signals (SIGTERM, SIGINT).
+/// Defines how the WaitSet handles POSIX termination signals.
 /// </summary>
+/// <remarks>
+/// iceoryx2 registers <c>SIGINT</c> and <c>SIGTERM</c> as one unit, so the choice is
+/// whether to handle termination requests at all.
+/// </remarks>
 public enum SignalHandlingMode
 {
     /// <summary>
@@ -23,17 +27,25 @@ public enum SignalHandlingMode
     Disabled = 0,
 
     /// <summary>
-    /// Wake up on SIGTERM (termination signal).
+    /// Wake up on SIGINT and SIGTERM.
     /// </summary>
+    HandleTerminationRequests = 1,
+
+    /// <summary>
+    /// Wake up on SIGINT and SIGTERM.
+    /// </summary>
+    [System.Obsolete("iceoryx2 registers SIGINT and SIGTERM together. Use HandleTerminationRequests.")]
     Termination = 1,
 
     /// <summary>
-    /// Wake up on SIGINT (interrupt signal, e.g., Ctrl+C).
+    /// Wake up on SIGINT and SIGTERM.
     /// </summary>
-    Interrupt = 2,
+    [System.Obsolete("iceoryx2 registers SIGINT and SIGTERM together. Use HandleTerminationRequests.")]
+    Interrupt = 1,
 
     /// <summary>
-    /// Wake up on both SIGTERM and SIGINT.
+    /// Wake up on SIGINT and SIGTERM.
     /// </summary>
-    TerminationAndInterrupt = 3
+    [System.Obsolete("iceoryx2 registers SIGINT and SIGTERM together. Use HandleTerminationRequests.")]
+    TerminationAndInterrupt = 1
 }

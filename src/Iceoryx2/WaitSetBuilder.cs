@@ -53,10 +53,16 @@ public sealed class WaitSetBuilder : IDisposable
     {
         ThrowIfDisposed();
 
+        // The public enum's members do not share the native discriminants, so map rather
+        // than cast: an unmapped value would reach an exhaustive Rust match.
+        var nativeMode = mode == SignalHandlingMode.Disabled
+            ? Native.Iox2NativeMethods.iox2_signal_handling_mode_e.DISABLED
+            : Native.Iox2NativeMethods.iox2_signal_handling_mode_e.HANDLE_TERMINATION_REQUESTS;
+
         var handlePtr = _handle.DangerousGetHandle();
         Native.Iox2NativeMethods.iox2_waitset_builder_set_signal_handling_mode(
             ref handlePtr,
-            (Native.Iox2NativeMethods.iox2_signal_handling_mode_e)mode);
+            nativeMode);
 
         return this;
     }

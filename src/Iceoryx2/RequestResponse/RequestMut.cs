@@ -110,8 +110,14 @@ public sealed class RequestMut<TRequest, TResponse> : IDisposable
     {
         ThrowIfDisposed();
 
+        // Native frees the request struct before it attempts delivery, so the handle is
+        // spent on the failure path too. Relinquish it before inspecting the result.
+        var handle = _handle;
+        _disposed = true;
+        _handle = IntPtr.Zero;
+
         var result = iox2_request_mut_send(
-            _handle,
+            handle,
             IntPtr.Zero,
             out var pendingResponseHandle);
 
@@ -119,10 +125,6 @@ public sealed class RequestMut<TRequest, TResponse> : IDisposable
         {
             return Result<PendingResponse<TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestSendFailed, result, iox2_request_send_error_string));
         }
-
-        // Mark as disposed since the handle is consumed by send
-        _disposed = true;
-        _handle = IntPtr.Zero;
 
         return Result<PendingResponse<TResponse>, Iox2Error>.Ok(new PendingResponse<TResponse>(pendingResponseHandle));
     }

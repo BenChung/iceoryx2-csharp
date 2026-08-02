@@ -13,7 +13,9 @@
 using Iceoryx2.ErrorHandling;
 using Iceoryx2.SafeHandles;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iceoryx2;
@@ -144,8 +146,7 @@ public sealed class Config : IDisposable
             throw new ArgumentException("ipcRoot must be a non-empty path", nameof(ipcRoot));
         if (!System.IO.Path.IsPathRooted(ipcRoot))
             throw new ArgumentException("ipcRoot must be an absolute path", nameof(ipcRoot));
-        if (string.IsNullOrEmpty(domain))
-            throw new ArgumentException("domain must be a non-empty name", nameof(domain));
+        ValidateDomain(domain);
 
         var root = System.IO.Path.Combine(ipcRoot, domain);
         Directory.CreateDirectory(root);
@@ -187,15 +188,18 @@ public sealed class Config : IDisposable
             throw new ArgumentException("ipcRoot must be a non-empty path", nameof(ipcRoot));
         if (!System.IO.Path.IsPathRooted(ipcRoot))
             throw new ArgumentException("ipcRoot must be an absolute path", nameof(ipcRoot));
-        if (string.IsNullOrEmpty(domain))
-            throw new ArgumentException("domain must be a non-empty name", nameof(domain));
+        ValidateDomain(domain);
+
+        // Sibling domains whose names extend this one share this domain's marker-file
+        // prefix, so collect them before the directory sweep removes the evidence.
+        var overlapping = OverlappingDomainPrefixes(ipcRoot, domain);
 
         var clean = true;
         var root = System.IO.Path.Combine(ipcRoot, domain);
         if (Directory.Exists(root))
         {
             // Delete file by file so one locked file doesn't abort the sweep.
-            foreach (var file in Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories))
+            foreach (var file in EnumerateFilesWithoutFollowingLinks(root, ref clean))
             {
                 try { File.Delete(file); } catch { clean = false; }
             }
@@ -213,10 +217,104 @@ public sealed class Config : IDisposable
                 continue;
             foreach (var file in Directory.EnumerateFiles(dir, prefix + "*"))
             {
+                var name = System.IO.Path.GetFileName(file);
+                if (BelongsToOtherDomain(name, overlapping))
+                    continue;
                 try { File.Delete(file); } catch { clean = false; }
             }
         }
         return clean;
+    }
+
+    /// <summary>
+    /// Domain names become one directory name under the IPC root and one marker-file
+    /// prefix, so they must be a single plain path segment.
+    /// </summary>
+    private static void ValidateDomain(string domain, [CallerArgumentExpression("domain")] string? paramName = null)
+    {
+        if (string.IsNullOrEmpty(domain))
+            throw new ArgumentException("domain must be a non-empty name", paramName);
+        if (domain != System.IO.Path.GetFileName(domain))
+            throw new ArgumentException($"domain must be a single path segment, not '{domain}'", paramName);
+        if (domain == "." || domain == "..")
+            throw new ArgumentException($"domain must name a directory, not '{domain}'", paramName);
+        if (System.IO.Path.IsPathRooted(domain))
+            throw new ArgumentException($"domain must be relative, not '{domain}'", paramName);
+        if (domain.IndexOfAny(s_forbiddenDomainChars) >= 0 ||
+            domain.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) >= 0)
+            throw new ArgumentException($"domain contains a character that is not allowed in a file name: '{domain}'", paramName);
+    }
+
+    // Wildcards would widen the marker-file glob; separators would escape the IPC root.
+    private static readonly char[] s_forbiddenDomainChars = { '*', '?', '/', '\\', ':' };
+
+    /// <summary>
+    /// Marker-file prefixes of existing domains that begin with <paramref name="domain"/>
+    /// followed by an underscore, whose files the glob for <paramref name="domain"/> also matches.
+    /// </summary>
+    private static List<string> OverlappingDomainPrefixes(string ipcRoot, string domain)
+    {
+        var result = new List<string>();
+        if (!Directory.Exists(ipcRoot))
+            return result;
+
+        try
+        {
+            foreach (var dir in Directory.EnumerateDirectories(ipcRoot))
+            {
+                var sibling = System.IO.Path.GetFileName(dir);
+                if (sibling.Length > domain.Length && sibling.StartsWith(domain + "_", StringComparison.Ordinal))
+                    result.Add($"iox2_{sibling}_");
+            }
+        }
+        catch
+        {
+            // An unreadable root means no siblings can be identified; the caller then
+            // deletes only what its own prefix matches.
+        }
+        return result;
+    }
+
+    private static bool BelongsToOtherDomain(string fileName, List<string> overlappingPrefixes)
+    {
+        foreach (var prefix in overlappingPrefixes)
+        {
+            if (fileName.StartsWith(prefix, StringComparison.Ordinal))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Files under <paramref name="root"/>, descending only into real directories. A
+    /// junction or symlink under the domain root points outside the domain, so its
+    /// contents are not this domain's to delete.
+    /// </summary>
+    private static List<string> EnumerateFilesWithoutFollowingLinks(string root, ref bool clean)
+    {
+        var files = new List<string>();
+        var pending = new Stack<string>();
+        pending.Push(root);
+
+        while (pending.Count > 0)
+        {
+            var current = pending.Pop();
+            try
+            {
+                files.AddRange(Directory.EnumerateFiles(current));
+                foreach (var child in Directory.EnumerateDirectories(current))
+                {
+                    if ((new DirectoryInfo(child).Attributes & FileAttributes.ReparsePoint) != 0)
+                        continue;
+                    pending.Push(child);
+                }
+            }
+            catch
+            {
+                clean = false;
+            }
+        }
+        return files;
     }
 
     /// <summary>

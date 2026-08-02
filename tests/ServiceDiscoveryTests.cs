@@ -11,6 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 using Iceoryx2;
+using System;
 using Xunit;
 
 namespace Iceoryx2.Tests;
@@ -59,10 +60,11 @@ public class ServiceDiscoveryTests
 
         try
         {
-            // Create a test service
+            // A unique name keeps this independent of services other tests leave behind.
+            var serviceName = $"test_discovery_service_{Guid.NewGuid():N}";
             var service = serviceNode.ServiceBuilder()
                 .PublishSubscribe<int>()
-                .Open("test_discovery_service")
+                .Open(serviceName)
                 .Expect("Failed to create test service");
 
             try
@@ -73,11 +75,13 @@ public class ServiceDiscoveryTests
 
                 var services = result.Expect("Should be Ok");
 
-                // Assert - verify we got a valid list (may be empty or contain services)
+                // Assert on the service just created. Asserting only that the list is
+                // non-null would pass just as well against a List() that reports nothing.
                 Assert.NotNull(services);
-                // Note: Service discovery might not always find the service immediately
-                // or service names might be stored in a different format
-                // So we just verify that List() works and returns a valid list
+                var found = services.Find(s => s.Name == serviceName);
+                Assert.True(found != null,
+                    $"discovery did not report '{serviceName}'; it listed {services.Count} service(s)");
+                Assert.Equal(MessagingPattern.PublishSubscribe, found!.MessagingPattern);
             }
             finally
             {

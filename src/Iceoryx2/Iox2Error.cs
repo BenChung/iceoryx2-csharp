@@ -79,6 +79,9 @@ public abstract class Iox2Error
             Iox2ErrorKind.ReaderCreationFailed => new ReaderCreationError(details),
             Iox2ErrorKind.EntryAccessFailed => new EntryAccessError(details),
             Iox2ErrorKind.ConfigCreationFailed => new ConfigCreationError(details),
+            // The specific ServiceListErrorKind is only known at the call site, which
+            // builds a ServiceListError directly; reaching here means an unmapped code.
+            Iox2ErrorKind.ServiceListFailed => ServiceListError.FromUnmappedCode(details),
             Iox2ErrorKind.NativePanic => new NativePanicError(details),
             Iox2ErrorKind.Unknown => new UnknownError(details),
             _ => new UnknownError(details)

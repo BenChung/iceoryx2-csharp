@@ -31,24 +31,12 @@ public sealed class WaitSet : IDisposable
     private SafeWaitSetHandle _handle;
     private bool _disposed;
 
-    private static readonly Native.Iox2NativeMethods.iox2_waitset_run_callback s_singleCallbackTrampoline =
-        (attachmentIdHandle, contextPtr) =>
-        {
-            var callback = Native.CallbackContext.Peek<Func<WaitSetAttachmentId, CallbackProgression>>(contextPtr);
-            if (callback is null)
-                return Native.Iox2NativeMethods.iox2_callback_progression_e.STOP;
-            try
-            {
-                using var attachmentId = new WaitSetAttachmentId(new SafeWaitSetAttachmentIdHandle(attachmentIdHandle));
-                return (Native.Iox2NativeMethods.iox2_callback_progression_e)callback(attachmentId);
-            }
-            catch
-            {
-                return Native.Iox2NativeMethods.iox2_callback_progression_e.STOP;
-            }
-        };
+    // Read by the callback trampoline on the waiting thread, written by Stop()
+    // from any thread.
+    private volatile bool _stopRequested;
 
     private sealed record WaitSetRunContext(
+        WaitSet Owner,
         Func<WaitSetAttachmentId, CallbackProgression> Callback,
         bool DisposeAttachments);
 
@@ -56,7 +44,7 @@ public sealed class WaitSet : IDisposable
         (attachmentIdHandle, contextPtr) =>
         {
             var ctx = Native.CallbackContext.Peek<WaitSetRunContext>(contextPtr);
-            if (ctx is null)
+            if (ctx is null || ctx.Owner._stopRequested)
                 return Native.Iox2NativeMethods.iox2_callback_progression_e.STOP;
             try
             {
@@ -130,7 +118,9 @@ public sealed class WaitSet : IDisposable
             ThrowIfDisposed();
             var handle = _handle.DangerousGetHandle();
             var mode = Native.Iox2NativeMethods.iox2_waitset_signal_handling_mode(ref handle);
-            return (SignalHandlingMode)mode;
+            return mode == Native.Iox2NativeMethods.iox2_signal_handling_mode_e.DISABLED
+                ? SignalHandlingMode.Disabled
+                : SignalHandlingMode.HandleTerminationRequests;
         }
     }
 
@@ -271,14 +261,15 @@ public sealed class WaitSet : IDisposable
         if (callback == null)
             throw new ArgumentNullException(nameof(callback));
 
+        _stopRequested = false;
         var waitsetHandle = _handle.DangerousGetHandle();
-        var contextPtr = Native.CallbackContext.Pin(callback);
+        var contextPtr = Native.CallbackContext.Pin(new WaitSetRunContext(this, callback, DisposeAttachments: true));
 
         try
         {
             var result = Native.Iox2NativeMethods.iox2_waitset_wait_and_process_once(
                 ref waitsetHandle,
-                s_singleCallbackTrampoline,
+                s_runCallbackTrampoline,
                 contextPtr,
                 out var runResult);
 
@@ -291,7 +282,7 @@ public sealed class WaitSet : IDisposable
         }
         finally
         {
-            Native.CallbackContext.Unpin<Func<WaitSetAttachmentId, CallbackProgression>>(contextPtr);
+            Native.CallbackContext.Unpin<WaitSetRunContext>(contextPtr);
         }
     }
 
@@ -312,16 +303,17 @@ public sealed class WaitSet : IDisposable
         if (callback == null)
             throw new ArgumentNullException(nameof(callback));
 
+        _stopRequested = false;
         var waitsetHandle = _handle.DangerousGetHandle();
         var seconds = (ulong)timeout.TotalSeconds;
         var nanoseconds = (uint)((timeout.TotalSeconds - seconds) * 1_000_000_000);
-        var contextPtr = Native.CallbackContext.Pin(callback);
+        var contextPtr = Native.CallbackContext.Pin(new WaitSetRunContext(this, callback, DisposeAttachments: true));
 
         try
         {
             var result = Native.Iox2NativeMethods.iox2_waitset_wait_and_process_once_with_timeout(
                 ref waitsetHandle,
-                s_singleCallbackTrampoline,
+                s_runCallbackTrampoline,
                 contextPtr,
                 seconds,
                 nanoseconds,
@@ -336,7 +328,7 @@ public sealed class WaitSet : IDisposable
         }
         finally
         {
-            Native.CallbackContext.Unpin<Func<WaitSetAttachmentId, CallbackProgression>>(contextPtr);
+            Native.CallbackContext.Unpin<WaitSetRunContext>(contextPtr);
         }
     }
 
@@ -506,8 +498,9 @@ public sealed class WaitSet : IDisposable
         if (callback == null)
             throw new ArgumentNullException(nameof(callback));
 
+        _stopRequested = false;
         var waitsetHandle = _handle.DangerousGetHandle();
-        var context = new WaitSetRunContext(callback, disposeAttachments);
+        var context = new WaitSetRunContext(this, callback, disposeAttachments);
         var contextPtr = Native.CallbackContext.Pin(context);
 
         try
@@ -532,14 +525,22 @@ public sealed class WaitSet : IDisposable
     }
 
     /// <summary>
-    /// Stops the WaitSet, causing WaitAndProcess() to return with WaitSetRunResult.StopRequest.
-    /// Can be called from another thread or from within a callback.
+    /// Requests that the running WaitSet stop, causing WaitAndProcess() to return with
+    /// WaitSetRunResult.StopRequest. Can be called from another thread or from within a
+    /// callback. The request is cleared each time a wait call starts, so it applies to the
+    /// run that is in flight.
     /// </summary>
+    /// <remarks>
+    /// The stop takes effect the next time the WaitSet delivers an event: it suppresses the
+    /// callback and unwinds the run. A WaitSet parked with no attachment ready keeps waiting
+    /// until an event or its timeout arrives. To bound that, drive the WaitSet with the
+    /// <see cref="WaitAndProcessOnce(Func{WaitSetAttachmentId, CallbackProgression}, TimeSpan)"/>
+    /// timeout overload, or attach a notifier you can signal to wake it.
+    /// </remarks>
     public void Stop()
     {
         ThrowIfDisposed();
-        var handle = _handle.DangerousGetHandle();
-        Native.Iox2NativeMethods.iox2_waitset_stop(ref handle);
+        _stopRequested = true;
     }
 
     /// <summary>

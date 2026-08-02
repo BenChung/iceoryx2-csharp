@@ -595,30 +595,12 @@ internal static partial class Iox2NativeMethods
         public iox2_type_detail_t type_details;
     }
 
-    [StructLayout(LayoutKind.Explicit)]
-    internal struct iox2_static_config_details_t
-    {
-        [FieldOffset(0)]
-        public iox2_static_config_event_t @event;
-        [FieldOffset(0)]
-        public iox2_static_config_publish_subscribe_t publish_subscribe;
-        [FieldOffset(0)]
-        public iox2_static_config_request_response_t request_response;
-        [FieldOffset(0)]
-        public iox2_static_config_blackboard_t blackboard;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct iox2_static_config_t
-    {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = IOX2_SERVICE_ID_LENGTH)]
-        public byte[] id;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = IOX2_SERVICE_NAME_LENGTH)]
-        public byte[] name;
-        public iox2_messaging_pattern_e messaging_pattern;
-        public iox2_static_config_details_t details;
-        public IntPtr attributes;  // iox2_attribute_set_h_ref
-    }
+    // The native iox2_static_config_t and its details union are deliberately not
+    // mirrored here. Overlapping the per-pattern detail structs at FieldOffset(0)
+    // puts an object reference (the ByValArray name fields) over non-object data,
+    // which the CLR refuses to load -- and a failed load of one type makes
+    // Assembly.GetTypes() throw for the whole assembly. Node.List reads the fields
+    // it needs at their computed offsets instead.
 
     // ========================================
     // Service Discovery - Callback Delegate
@@ -1386,10 +1368,8 @@ internal static partial class Iox2NativeMethods
 
     internal enum iox2_signal_handling_mode_e
     {
-        DISABLED = 0,
-        TERMINATION = 1,
-        INTERRUPT = 2,
-        TERMINATION_AND_INTERRUPT = 3
+        HANDLE_TERMINATION_REQUESTS = IOX2_OK + 1,
+        DISABLED
     }
 
     internal enum iox2_callback_progression_e
@@ -1525,9 +1505,6 @@ internal static partial class Iox2NativeMethods
         ulong seconds,
         uint nanoseconds,
         out iox2_waitset_run_result_e result);
-
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_stop")]
-    internal static extern void iox2_waitset_stop(ref IntPtr waitset_handle);
 
     // ========================================
     // WaitSetGuard API
