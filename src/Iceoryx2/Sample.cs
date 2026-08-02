@@ -263,9 +263,9 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
 
             return Result<Unit, Iox2Error>.Ok(Unit.Value);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Unit, Iox2Error>.Err(Iox2Error.SendFailed);
+            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SendFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 

@@ -47,3 +47,5 @@ runtimes/
 
 # Dash license tool
 tools/
+# Machine-local game deployment settings for the DeployToGame target
+GameDeploy.props

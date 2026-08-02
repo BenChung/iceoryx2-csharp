@@ -118,13 +118,13 @@ public sealed class EventServiceBuilder
             Native.Iox2NativeMethods.iox2_service_name_drop(serviceNameHandle);
 
             if (serviceBuilderHandle == IntPtr.Zero)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.EventServiceCreationFailed, "no handle returned"));
 
             // Get event builder
             var eventBuilderHandle = Native.Iox2NativeMethods.iox2_service_builder_event(serviceBuilderHandle);
 
             if (eventBuilderHandle == IntPtr.Zero)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.EventServiceCreationFailed, "no handle returned"));
 
             // Apply configuration settings if specified
             if (_maxEventId.HasValue)
@@ -163,16 +163,16 @@ public sealed class EventServiceBuilder
                     Native.Iox2NativeMethods.iox2_event_open_or_create_error_string));
 
             if (portFactoryHandle == IntPtr.Zero)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.EventServiceCreationFailed, "no handle returned"));
 
             var handle = new SafeEventServiceHandle(portFactoryHandle);
             var service = new EventService(handle);
 
             return Result<EventService, Iox2Error>.Ok(service);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+            return Result<EventService, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.EventServiceCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 
@@ -217,13 +217,13 @@ public sealed class EventServiceBuilder
             Native.Iox2NativeMethods.iox2_service_name_drop(serviceNameHandle);
 
             if (serviceBuilderHandle == IntPtr.Zero)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.EventServiceCreationFailed, "no handle returned"));
 
             // Get event builder
             var eventBuilderHandle = Native.Iox2NativeMethods.iox2_service_builder_event(serviceBuilderHandle);
 
             if (eventBuilderHandle == IntPtr.Zero)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.EventServiceCreationFailed, "no handle returned"));
 
             // Apply configuration settings if specified
             if (_maxEventId.HasValue)
@@ -262,16 +262,16 @@ public sealed class EventServiceBuilder
                     Native.Iox2NativeMethods.iox2_event_open_or_create_error_string));
 
             if (portFactoryHandle == IntPtr.Zero)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.EventServiceCreationFailed, "no handle returned"));
 
             var handle = new SafeEventServiceHandle(portFactoryHandle);
             var service = new EventService(handle);
 
             return Result<EventService, Iox2Error>.Ok(service);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+            return Result<EventService, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.EventServiceCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 }

@@ -87,7 +87,7 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
 
             if (serviceBuilderHandle == IntPtr.Zero)
             {
-                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.RequestResponseServiceCreationFailed);
+                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestResponseServiceCreationFailed, "no handle returned"));
             }
 
             // Get request-response builder
@@ -95,7 +95,7 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
 
             if (requestResponseBuilderHandle == IntPtr.Zero)
             {
-                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.RequestResponseServiceCreationFailed);
+                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestResponseServiceCreationFailed, "no handle returned"));
             }
 
             // Set request payload type details

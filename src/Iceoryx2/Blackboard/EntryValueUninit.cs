@@ -14,6 +14,8 @@ using Iceoryx2.SafeHandles;
 using System;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.Blackboard;
 
 /// <summary>
@@ -96,7 +98,7 @@ public sealed class EntryValueUninit<TKey, TValue> : IDisposable
 
         if (entryHandleMutPtr == IntPtr.Zero)
         {
-            return Result<EntryHandleMut<TKey, TValue>, Iox2Error>.Err(Iox2Error.EntryAccessFailed);
+            return Result<EntryHandleMut<TKey, TValue>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.EntryAccessFailed, "no handle returned"));
         }
 
         return Result<EntryHandleMut<TKey, TValue>, Iox2Error>.Ok(

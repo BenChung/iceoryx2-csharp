@@ -68,7 +68,7 @@ public sealed class Service : IDisposable
                 IntPtr.Zero);  // NULL - let C allocate the struct
 
             if (publisherBuilderHandle == IntPtr.Zero)
-                return Result<Publisher, Iox2Error>.Err(Iox2Error.PublisherCreationFailed);
+                return Result<Publisher, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.PublisherCreationFailed, "no handle returned"));
 
             // Create publisher - pass NULL to let C allocate on heap
             var result = Native.Iox2NativeMethods.iox2_port_factory_publisher_builder_create(
@@ -84,9 +84,9 @@ public sealed class Service : IDisposable
 
             return Result<Publisher, Iox2Error>.Ok(publisher);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Publisher, Iox2Error>.Err(Iox2Error.PublisherCreationFailed);
+            return Result<Publisher, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.PublisherCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 
@@ -107,7 +107,7 @@ public sealed class Service : IDisposable
                 IntPtr.Zero);  // NULL - let C allocate the struct
 
             if (subscriberBuilderHandle == IntPtr.Zero)
-                return Result<Subscriber, Iox2Error>.Err(Iox2Error.SubscriberCreationFailed);
+                return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SubscriberCreationFailed, "no handle returned"));
 
             // Create subscriber - pass NULL to let C allocate on heap
             var result = Native.Iox2NativeMethods.iox2_port_factory_subscriber_builder_create(
@@ -123,9 +123,9 @@ public sealed class Service : IDisposable
 
             return Result<Subscriber, Iox2Error>.Ok(subscriber);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Subscriber, Iox2Error>.Err(Iox2Error.SubscriberCreationFailed);
+            return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SubscriberCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 

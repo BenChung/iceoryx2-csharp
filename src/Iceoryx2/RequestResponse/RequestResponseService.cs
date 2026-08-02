@@ -51,7 +51,7 @@ public sealed class RequestResponseService<TRequest, TResponse> : IDisposable
 
         if (clientBuilderHandle == IntPtr.Zero)
         {
-            return Result<Client<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.ClientCreationFailed);
+            return Result<Client<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ClientCreationFailed, "no handle returned"));
         }
 
         var result = iox2_port_factory_client_builder_create(
@@ -82,7 +82,7 @@ public sealed class RequestResponseService<TRequest, TResponse> : IDisposable
 
         if (serverBuilderHandle == IntPtr.Zero)
         {
-            return Result<Server<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.ServerCreationFailed);
+            return Result<Server<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServerCreationFailed, "no handle returned"));
         }
 
         var result = iox2_port_factory_server_builder_create(

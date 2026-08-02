@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Machine-local game deployment settings (gitignored); see DeployToGame below -->
+  <Import Project="$(MSBuildThisFileDirectory)../../GameDeploy.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)../../GameDeploy.props')" />
+
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0;netstandard2.1</TargetFrameworks>
     <LangVersion>latest</LangVersion>
@@ -88,10 +92,35 @@
           SkipUnchangedFiles="true" />
     
     <!-- Windows -->
-    <Copy SourceFiles="$(NativeLibrarySourcePathWindows)" 
-          DestinationFolder="$(OutputPath)" 
+    <Copy SourceFiles="$(NativeLibrarySourcePathWindows)"
+          DestinationFolder="$(OutputPath)"
           Condition="Exists('$(NativeLibrarySourcePathWindows)')"
           SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Deploys the managed and native DLLs into the game checkout named by
+       GameDir in GameDeploy.props at the repository root. Runs on the
+       netstandard2.1 Release build (the Unity-facing target) and is a no-op
+       when GameDeploy.props is absent. A DLL held open by a running Unity
+       editor downgrades that copy to a warning. -->
+  <Target Name="DeployToGame" AfterTargets="Build"
+          Condition="'$(GameDir)' != '' And '$(TargetFramework)' == 'netstandard2.1' And '$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <GameManagedDir Condition="'$(GameManagedDir)' == ''">$(GameDir)\Assets\Scripts\AI\Scripten\ServerLibs</GameManagedDir>
+      <GameNativeDir Condition="'$(GameNativeDir)' == ''">$(GameDir)\Assets\Plugins\Windows\x86_64</GameNativeDir>
+      <GameNativeDllPath>$(MSBuildThisFileDirectory)../../iceoryx2/target/release/iceoryx2_ffi_c.dll</GameNativeDllPath>
+    </PropertyGroup>
+
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="$(GameManagedDir)"
+          SkipUnchangedFiles="true"
+          ContinueOnError="WarnAndContinue" />
+    <Copy SourceFiles="$(GameNativeDllPath)"
+          DestinationFolder="$(GameNativeDir)"
+          Condition="Exists('$(GameNativeDllPath)')"
+          SkipUnchangedFiles="true"
+          ContinueOnError="WarnAndContinue" />
+    <Message Importance="high" Text="Deployed Iceoryx2.dll and iceoryx2_ffi_c.dll to $(GameDir)" />
   </Target>
 
 </Project>

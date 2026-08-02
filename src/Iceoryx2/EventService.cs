@@ -48,7 +48,7 @@ public sealed class EventService : IDisposable
                 IntPtr.Zero);  // NULL - let C allocate the struct
 
             if (notifierBuilderHandle == IntPtr.Zero)
-                return Result<Notifier, Iox2Error>.Err(Iox2Error.NotifierCreationFailed);
+                return Result<Notifier, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.NotifierCreationFailed, "no handle returned"));
 
             // Set default event ID if provided
             if (defaultEventId.HasValue)
@@ -75,9 +75,9 @@ public sealed class EventService : IDisposable
 
             return Result<Notifier, Iox2Error>.Ok(notifier);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Notifier, Iox2Error>.Err(Iox2Error.NotifierCreationFailed);
+            return Result<Notifier, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.NotifierCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 
@@ -98,7 +98,7 @@ public sealed class EventService : IDisposable
                 IntPtr.Zero);  // NULL - let C allocate the struct
 
             if (listenerBuilderHandle == IntPtr.Zero)
-                return Result<Listener, Iox2Error>.Err(Iox2Error.ListenerCreationFailed);
+                return Result<Listener, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ListenerCreationFailed, "no handle returned"));
 
             // Create listener - pass NULL to let C allocate on heap
             var result = Native.Iox2NativeMethods.iox2_port_factory_listener_builder_create(
@@ -116,9 +116,9 @@ public sealed class EventService : IDisposable
 
             return Result<Listener, Iox2Error>.Ok(listener);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Listener, Iox2Error>.Err(Iox2Error.ListenerCreationFailed);
+            return Result<Listener, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ListenerCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 

@@ -131,7 +131,11 @@ public sealed class Config : IDisposable
     /// shared-memory state directories, since iceoryx2 creates neither.
     /// </summary>
     /// <param name="ipcRoot">Directory under which all domains live. Every
-    /// participant must use the same value.</param>
+    /// participant must use the same value. The longest composed file path is
+    /// <c>&lt;root&gt;\nodes\&lt;node-id&gt;\&lt;prefix&gt;&lt;hash&gt;.service_tag</c>
+    /// within the platform's 255-character limit, so
+    /// <c>ipcRoot.Length + 2 * domain.Length</c> must stay at or below ~149
+    /// (the domain counts twice: directory and file prefix).</param>
     /// <param name="domain">Domain name; isolates this deployment's services
     /// from others on the machine.</param>
     public static Result<Config, Iox2Error> ForDomain(string ipcRoot, string domain)

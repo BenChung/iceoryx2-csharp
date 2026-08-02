@@ -1,3 +1,4 @@
 [submodule "iceoryx2"]
 	path = iceoryx2
-	url = https://github.com/eclipse-iceoryx/iceoryx2.git
+	url = https://github.com/BenChung/iceoryx2.git
+	branch = sp-main

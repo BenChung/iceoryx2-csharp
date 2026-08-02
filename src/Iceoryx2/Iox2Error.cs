@@ -117,6 +117,20 @@ public abstract class Iox2Error
         return FromKind(kind, $"error {code}");
     }
 
+    /// <summary>
+    /// Creates the error for a native call that returned no handle: a
+    /// <see cref="NativePanicError"/> when a caught panic caused it (guarded
+    /// calls return a null sentinel after a panic), otherwise an error of
+    /// <paramref name="kind"/> with the given detail.
+    /// </summary>
+    internal static Iox2Error FromNative(Iox2ErrorKind kind, string detail)
+    {
+        var panic = Iox2Runtime.TakeLastPanic();
+        if (panic != null)
+            return new NativePanicError(panic);
+        return FromKind(kind, detail);
+    }
+
     // Backward compatibility: Static error instances
 
     /// <summary>Gets a <see cref="NodeCreationError"/> instance for backward compatibility.</summary>

@@ -154,7 +154,7 @@ public sealed class PublishSubscribeServiceBuilder<T> where T : unmanaged
             Native.Iox2NativeMethods.iox2_service_name_drop(serviceNameHandle);
 
             if (serviceBuilderHandle == IntPtr.Zero)
-                return Result<Service, Iox2Error>.Err(Iox2Error.ServiceCreationFailed);
+                return Result<Service, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServiceCreationFailed, "no handle returned"));
 
             // Get pub/sub builder
             var pubSubBuilderHandle = Native.Iox2NativeMethods.iox2_service_builder_pub_sub(serviceBuilderHandle);
@@ -250,16 +250,16 @@ public sealed class PublishSubscribeServiceBuilder<T> where T : unmanaged
                 return Result<Service, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServiceCreationFailed, openResult, Native.Iox2NativeMethods.iox2_pub_sub_open_or_create_error_string));
 
             if (portFactoryHandle == IntPtr.Zero)
-                return Result<Service, Iox2Error>.Err(Iox2Error.ServiceCreationFailed);
+                return Result<Service, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServiceCreationFailed, "no handle returned"));
 
             var handle = new SafeServiceHandle(portFactoryHandle);
             var service = new Service(handle);
 
             return Result<Service, Iox2Error>.Ok(service);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Service, Iox2Error>.Err(Iox2Error.ServiceCreationFailed);
+            return Result<Service, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ServiceCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 }

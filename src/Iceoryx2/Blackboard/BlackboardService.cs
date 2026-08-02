@@ -53,7 +53,7 @@ public sealed class BlackboardService<TKey> : IDisposable
 
         if (writerBuilderHandle == IntPtr.Zero)
         {
-            return Result<Writer<TKey>, Iox2Error>.Err(Iox2Error.WriterCreationFailed);
+            return Result<Writer<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WriterCreationFailed, "no handle returned"));
         }
 
         var result = iox2_port_factory_writer_builder_create(
@@ -85,7 +85,7 @@ public sealed class BlackboardService<TKey> : IDisposable
 
         if (readerBuilderHandle == IntPtr.Zero)
         {
-            return Result<Reader<TKey>, Iox2Error>.Err(Iox2Error.ReaderCreationFailed);
+            return Result<Reader<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ReaderCreationFailed, "no handle returned"));
         }
 
         var result = iox2_port_factory_reader_builder_create(

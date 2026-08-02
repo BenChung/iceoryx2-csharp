@@ -71,7 +71,7 @@ public sealed class PublisherBuilder
                 IntPtr.Zero);  // NULL - let C allocate the struct
 
             if (publisherBuilderHandle == IntPtr.Zero)
-                return Result<Publisher, Iox2Error>.Err(Iox2Error.PublisherCreationFailed);
+                return Result<Publisher, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.PublisherCreationFailed, "no handle returned"));
 
             // Apply QoS settings if specified
             if (_maxLoanedSamples.HasValue)
@@ -100,9 +100,9 @@ public sealed class PublisherBuilder
 
             return Result<Publisher, Iox2Error>.Ok(publisher);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Publisher, Iox2Error>.Err(Iox2Error.PublisherCreationFailed);
+            return Result<Publisher, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.PublisherCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 }

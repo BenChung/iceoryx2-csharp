@@ -58,7 +58,7 @@ public sealed class SubscriberBuilder
                 IntPtr.Zero);  // NULL - let C allocate the struct
 
             if (subscriberBuilderHandle == IntPtr.Zero)
-                return Result<Subscriber, Iox2Error>.Err(Iox2Error.SubscriberCreationFailed);
+                return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SubscriberCreationFailed, "no handle returned"));
 
             // Apply buffer size if specified
             if (_bufferSize.HasValue)
@@ -81,9 +81,9 @@ public sealed class SubscriberBuilder
 
             return Result<Subscriber, Iox2Error>.Ok(subscriber);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Subscriber, Iox2Error>.Err(Iox2Error.SubscriberCreationFailed);
+            return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SubscriberCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 }

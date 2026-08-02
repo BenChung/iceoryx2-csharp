@@ -123,7 +123,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
             if (serviceBuilderHandle == IntPtr.Zero)
             {
-                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, "no handle returned"));
             }
 
             // Get blackboard opener builder
@@ -131,7 +131,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
             if (blackboardOpenerHandle == IntPtr.Zero)
             {
-                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, "no handle returned"));
             }
 
             // Set key type details
@@ -236,7 +236,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
             if (serviceBuilderHandle == IntPtr.Zero)
             {
-                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, "no handle returned"));
             }
 
             // Get blackboard creator builder
@@ -244,7 +244,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
             if (blackboardCreatorHandle == IntPtr.Zero)
             {
-                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, "no handle returned"));
             }
 
             // Set key type details

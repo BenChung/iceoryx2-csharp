@@ -13,6 +13,8 @@
 using Iceoryx2.SafeHandles;
 using System;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -67,7 +69,7 @@ public sealed class NodeBuilder
                 var builderHandle = Native.Iox2NativeMethods.iox2_node_builder_new(ref builderStruct);
 
                 if (builderHandle == IntPtr.Zero)
-                    return Result<Node, Iox2Error>.Err(Iox2Error.NodeCreationFailed);
+                    return Result<Node, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.NodeCreationFailed, "no handle returned"));
 
                 // Set node name if provided
                 if (!string.IsNullOrEmpty(_name))
@@ -110,9 +112,9 @@ public sealed class NodeBuilder
                 return Result<Node, Iox2Error>.Ok(node);
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Node, Iox2Error>.Err(Iox2Error.NodeCreationFailed);
+            return Result<Node, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.NodeCreationFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 }

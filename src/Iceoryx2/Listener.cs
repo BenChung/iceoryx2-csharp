@@ -61,9 +61,9 @@ public sealed class Listener : IDisposable
             var eventId = EventId.FromNative(nativeEventId);
             return Result<EventId?, Iox2Error>.Ok(eventId);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<EventId?, Iox2Error>.Err(Iox2Error.WaitFailed);
+            return Result<EventId?, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 
@@ -101,9 +101,9 @@ public sealed class Listener : IDisposable
             var eventId = EventId.FromNative(nativeEventId);
             return Result<EventId?, Iox2Error>.Ok(eventId);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<EventId?, Iox2Error>.Err(Iox2Error.WaitFailed);
+            return Result<EventId?, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 
@@ -178,9 +178,9 @@ public sealed class Listener : IDisposable
             var eventId = EventId.FromNative(nativeEventId);
             return Result<EventId, Iox2Error>.Ok(eventId);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<EventId, Iox2Error>.Err(Iox2Error.WaitFailed);
+            return Result<EventId, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 

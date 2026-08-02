@@ -15,6 +15,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -71,9 +73,9 @@ public sealed class Subscriber : IDisposable
 
             return Result<Sample<T>?, Iox2Error>.Ok(sample);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            return Result<Sample<T>?, Iox2Error>.Err(Iox2Error.ReceiveFailed);
+            return Result<Sample<T>?, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ReceiveFailed, e.GetType().Name + ": " + e.Message));
         }
     }
 

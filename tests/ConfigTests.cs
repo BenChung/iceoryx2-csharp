@@ -203,6 +203,46 @@ namespace Iceoryx2.Tests
         }
 
         [Fact]
+        public void Listeners_WorkUnderLongDomainRoots()
+        {
+            // Event sockets live at <root>\<prefix><listener-id>.event; with a
+            // realistic ~100-char domain root this exceeds the classic 108-byte
+            // sun_path limit, which the forked Windows platform layer raises to
+            // hold a full 255-char path.
+            var ipcRoot = Path.Combine(Path.GetTempPath(), "Long Company Name", "Long Game Name",
+                "script_ipc-" + Guid.NewGuid().ToString("N").Substring(0, 8));
+            var domain = "longroot_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            using var config = Config.ForDomain(ipcRoot, domain).Unwrap();
+            using var node = NodeBuilder.New().WithConfig(config).Create().Unwrap();
+            using var service = node.ServiceBuilder().Event().Open("svc/heartbeat/response").Unwrap();
+
+            using var listener = service.CreateListener().Unwrap();
+            using var notifier = service.CreateNotifier().Unwrap();
+
+            notifier.Notify().Unwrap();
+            Assert.NotNull(listener.TryWait().Unwrap());
+        }
+
+        [Fact]
+        public void Listeners_WorkUnderShortDomainRoots()
+        {
+            var ipcRoot = @"C:\ProgramData\sp_ipc";
+            var domain = "t_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            using var config = Config.ForDomain(ipcRoot, domain).Unwrap();
+            using var node = NodeBuilder.New().WithConfig(config).Create().Unwrap();
+            using var service = node.ServiceBuilder().Event().Open("svc/heartbeat/response").Unwrap();
+
+            using var listener = service.CreateListener().Unwrap();
+            using var notifier = service.CreateNotifier().Unwrap();
+
+            notifier.Notify().Unwrap();
+            Assert.NotNull(listener.TryWait().Unwrap());
+
+            node.Dispose();
+            Config.WipeDomain(ipcRoot, domain);
+        }
+
+        [Fact]
         public void ServiceErrors_CarryNativeReason()
         {
             var ipcRoot = UniqueIpcRoot();
