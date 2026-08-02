@@ -30,6 +30,14 @@ namespace Iceoryx2.Tests
             Path.Combine(Path.GetTempPath(), "iox2-csharp-config-tests", Guid.NewGuid().ToString("N"));
 
         [Fact]
+        public void Prelink_ResolvesAllNativeEntryPoints()
+        {
+            // Guards against binding drift: every DllImport must resolve
+            // against the current native library.
+            Iox2Runtime.Prelink();
+        }
+
+        [Fact]
         public void Default_ExposesRootPathAndPrefix()
         {
             using var config = Config.Default().Unwrap();

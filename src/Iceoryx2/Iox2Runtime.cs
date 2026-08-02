@@ -41,6 +41,20 @@ public static class Iox2Runtime
     public static event Action<string>? NativePanic;
 
     /// <summary>
+    /// Eagerly creates and caches the marshaling stubs for every native
+    /// binding, and resolves their entry points against the native library.
+    /// Call it as early as possible in hosts whose tooling patches reflection
+    /// after startup (for example the Unity editor with Hot Reload): stubs
+    /// created before the patches engage let later first-calls skip the
+    /// patched reflection path. Throws when a binding cannot be set up, which
+    /// also surfaces a missing or mismatched native library immediately.
+    /// </summary>
+    public static void Prelink()
+    {
+        Marshal.PrelinkAll(typeof(Native.Iox2NativeMethods));
+    }
+
+    /// <summary>
     /// Installs the native panic reporting hook. Idempotent; called
     /// automatically by <see cref="NodeBuilder.Create"/>.
     /// </summary>
