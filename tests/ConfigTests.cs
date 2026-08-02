@@ -214,7 +214,7 @@ namespace Iceoryx2.Tests
 
             Assert.True(second.IsErr);
             var message = second.Match(ok => "", err => err.Message);
-            Assert.Contains("Exists", message);
+            Assert.Contains("already exists", message);
         }
 
         [Fact]
