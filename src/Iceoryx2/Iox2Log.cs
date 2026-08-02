@@ -209,11 +209,19 @@ public static class Iox2Log
         {
             unsafe
             {
-                var originStr = origin != IntPtr.Zero
-                    ? Marshal.PtrToStringUTF8(origin) ?? string.Empty
-                    : string.Empty;
-                var messageStr = Marshal.PtrToStringUTF8(message) ?? string.Empty;
-                callback((LogLevel)level, originStr, messageStr);
+                try
+                {
+                    var originStr = origin != IntPtr.Zero
+                        ? Marshal.PtrToStringUTF8(origin) ?? string.Empty
+                        : string.Empty;
+                    var messageStr = Marshal.PtrToStringUTF8(message) ?? string.Empty;
+                    callback((LogLevel)level, originStr, messageStr);
+                }
+                catch
+                {
+                    // A throwing log callback must never unwind into the
+                    // native caller mid-operation.
+                }
             }
         };
 

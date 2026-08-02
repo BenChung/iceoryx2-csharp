@@ -65,7 +65,7 @@ public sealed class Publisher : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Sample<T>, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SampleLoanFailed, e.GetType().Name + ": " + e.Message));
+            return Result<Sample<T>, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SampleLoanFailed, e.ToString()));
         }
     }
 
@@ -101,7 +101,7 @@ public sealed class Publisher : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Sample<T>, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SampleLoanFailed, e.GetType().Name + ": " + e.Message));
+            return Result<Sample<T>, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SampleLoanFailed, e.ToString()));
         }
     }
 
@@ -139,7 +139,7 @@ public sealed class Publisher : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SendFailed, e.GetType().Name + ": " + e.Message));
+            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SendFailed, e.ToString()));
         }
     }
 
@@ -308,7 +308,7 @@ public sealed class Publisher : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ConnectionUpdateFailed, e.GetType().Name + ": " + e.Message));
+            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ConnectionUpdateFailed, e.ToString()));
         }
     }
 

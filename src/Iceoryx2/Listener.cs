@@ -63,7 +63,7 @@ public sealed class Listener : IDisposable
         }
         catch (Exception e)
         {
-            return Result<EventId?, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.GetType().Name + ": " + e.Message));
+            return Result<EventId?, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.ToString()));
         }
     }
 
@@ -103,7 +103,7 @@ public sealed class Listener : IDisposable
         }
         catch (Exception e)
         {
-            return Result<EventId?, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.GetType().Name + ": " + e.Message));
+            return Result<EventId?, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.ToString()));
         }
     }
 
@@ -180,7 +180,7 @@ public sealed class Listener : IDisposable
         }
         catch (Exception e)
         {
-            return Result<EventId, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.GetType().Name + ": " + e.Message));
+            return Result<EventId, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.WaitFailed, e.ToString()));
         }
     }
 

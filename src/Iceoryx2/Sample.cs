@@ -265,7 +265,7 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
         }
         catch (Exception e)
         {
-            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SendFailed, e.GetType().Name + ": " + e.Message));
+            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.SendFailed, e.ToString()));
         }
     }
 

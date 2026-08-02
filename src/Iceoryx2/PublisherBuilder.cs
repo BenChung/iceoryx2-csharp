@@ -102,7 +102,7 @@ public sealed class PublisherBuilder
         }
         catch (Exception e)
         {
-            return Result<Publisher, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.PublisherCreationFailed, e.GetType().Name + ": " + e.Message));
+            return Result<Publisher, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.PublisherCreationFailed, e.ToString()));
         }
     }
 }

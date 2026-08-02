@@ -259,7 +259,7 @@ public sealed class PublishSubscribeServiceBuilder<T> where T : unmanaged
         }
         catch (Exception e)
         {
-            return Result<Service, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ServiceCreationFailed, e.GetType().Name + ": " + e.Message));
+            return Result<Service, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.ServiceCreationFailed, e.ToString()));
         }
     }
 }

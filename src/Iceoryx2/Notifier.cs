@@ -56,7 +56,7 @@ public sealed class Notifier : IDisposable
         }
         catch (Exception e)
         {
-            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.NotifyFailed, e.GetType().Name + ": " + e.Message));
+            return Result<Unit, Iox2Error>.Err(Iox2Error.FromKind(Iox2ErrorKind.NotifyFailed, e.ToString()));
         }
     }
 
