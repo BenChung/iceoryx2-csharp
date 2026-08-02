@@ -14,6 +14,8 @@ using Iceoryx2.SafeHandles;
 using System;
 using System.Runtime.InteropServices;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -253,7 +255,7 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
                 IntPtr.Zero);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<Unit, Iox2Error>.Err(Iox2Error.SendFailed);
+                return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SendFailed, result, Native.Iox2NativeMethods.iox2_send_error_string));
 
             // The handle is consumed by send
             _handle.SetHandleAsInvalid();

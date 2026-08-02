@@ -16,6 +16,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.Blackboard;
 
 /// <summary>
@@ -105,7 +107,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
         if (serviceNameResult != IOX2_OK)
         {
-            return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+            return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, serviceNameResult, iox2_semantic_string_error_string));
         }
 
         try
@@ -146,7 +148,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
             if (keyResult != IOX2_OK)
             {
-                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, keyResult));
             }
 
             // Open the service
@@ -157,7 +159,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
             if (result != IOX2_OK)
             {
-                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, result, iox2_blackboard_open_error_string));
             }
 
             return Result<BlackboardService<TKey>, Iox2Error>.Ok(
@@ -218,7 +220,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
         if (serviceNameResult != IOX2_OK)
         {
-            return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+            return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, serviceNameResult, iox2_semantic_string_error_string));
         }
 
         try
@@ -259,7 +261,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
             if (keyResult != IOX2_OK)
             {
-                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+                return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, keyResult));
             }
 
             // Set key comparison function
@@ -314,7 +316,7 @@ public sealed class BlackboardServiceBuilder<TKey> : IDisposable
 
                 if (result != IOX2_OK)
                 {
-                    return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.BlackboardServiceCreationFailed);
+                    return Result<BlackboardService<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.BlackboardServiceCreationFailed, result, iox2_blackboard_create_error_string));
                 }
 
                 return Result<BlackboardService<TKey>, Iox2Error>.Ok(

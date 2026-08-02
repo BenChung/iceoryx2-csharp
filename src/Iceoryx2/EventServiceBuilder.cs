@@ -10,6 +10,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+using Iceoryx2.ErrorHandling;
 using Iceoryx2.SafeHandles;
 using System;
 
@@ -99,7 +100,9 @@ public sealed class EventServiceBuilder
                 out var serviceNameHandle);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(
+                    Iox2ErrorKind.EventServiceCreationFailed, result,
+                    Native.Iox2NativeMethods.iox2_semantic_string_error_string));
 
             // Get service name ptr for builder
             var serviceNamePtr = Native.Iox2NativeMethods.iox2_cast_service_name_ptr(serviceNameHandle);
@@ -155,7 +158,9 @@ public sealed class EventServiceBuilder
                 out var portFactoryHandle);
 
             if (openResult != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(
+                    Iox2ErrorKind.EventServiceCreationFailed, openResult,
+                    Native.Iox2NativeMethods.iox2_event_open_or_create_error_string));
 
             if (portFactoryHandle == IntPtr.Zero)
                 return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
@@ -194,7 +199,9 @@ public sealed class EventServiceBuilder
                 out var serviceNameHandle);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(
+                    Iox2ErrorKind.EventServiceCreationFailed, result,
+                    Native.Iox2NativeMethods.iox2_semantic_string_error_string));
 
             // Get service name ptr for builder
             var serviceNamePtr = Native.Iox2NativeMethods.iox2_cast_service_name_ptr(serviceNameHandle);
@@ -250,7 +257,9 @@ public sealed class EventServiceBuilder
                 out var portFactoryHandle);
 
             if (createResult != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);
+                return Result<EventService, Iox2Error>.Err(Iox2Error.FromNative(
+                    Iox2ErrorKind.EventServiceCreationFailed, createResult,
+                    Native.Iox2NativeMethods.iox2_event_open_or_create_error_string));
 
             if (portFactoryHandle == IntPtr.Zero)
                 return Result<EventService, Iox2Error>.Err(Iox2Error.EventServiceCreationFailed);

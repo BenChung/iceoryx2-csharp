@@ -13,6 +13,8 @@
 using System;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.RequestResponse;
 
 /// <summary>
@@ -76,7 +78,7 @@ public sealed class ResponseMut<TResponse> : IDisposable
 
         if (result != IOX2_OK)
         {
-            return Result<Unit, Iox2Error>.Err(Iox2Error.ResponseSendFailed);
+            return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ResponseSendFailed, result, iox2_send_error_string));
         }
 
         // Mark as disposed since the handle is consumed by send

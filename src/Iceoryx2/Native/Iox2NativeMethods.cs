@@ -462,7 +462,7 @@ internal static partial class Iox2NativeMethods
     // Logging API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_set_log_level_from_env_or")]
     internal static extern void iox2_set_log_level_from_env_or(iox2_log_level_e log_level);
 
     // ========================================
@@ -474,14 +474,14 @@ internal static partial class Iox2NativeMethods
     /// C signature: iox2_node_builder_h iox2_node_builder_new(struct iox2_node_builder_t *node_builder_struct_ptr)
     /// Returns: handle to the builder (pointer to opaque type)
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_builder_new")]
     internal static extern IntPtr iox2_node_builder_new(ref iox2_node_builder_t node_builder_struct);
 
     /// <summary>
     /// Sets the name for the node builder.
     /// C signature: void iox2_node_builder_set_name(iox2_node_builder_h_ref node_builder_handle, iox2_node_name_ptr node_name_ptr)
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_builder_set_name")]
     internal static extern void iox2_node_builder_set_name(
         ref IntPtr node_builder_handle,  // Pass by reference - C expects pointer to handle
         IntPtr node_name_ptr);
@@ -490,7 +490,7 @@ internal static partial class Iox2NativeMethods
     /// Sets the config for the node builder. The builder copies the config.
     /// C signature: void iox2_node_builder_set_config(iox2_node_builder_h_ref node_builder_handle, iox2_config_h_ref config_handle)
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_builder_set_config")]
     internal static extern void iox2_node_builder_set_config(
         ref IntPtr node_builder_handle,
         ref IntPtr config_handle);
@@ -503,7 +503,7 @@ internal static partial class Iox2NativeMethods
     ///                                           iox2_node_h *node_handle_ptr)
     /// Returns: IOX2_OK (0) on success, error code otherwise
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_builder_create")]
     internal static extern int iox2_node_builder_create(
         IntPtr node_builder_handle,
         IntPtr node_struct_ptr,  // Changed to IntPtr to allow passing NULL
@@ -643,20 +643,20 @@ internal static partial class Iox2NativeMethods
     // Node API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_drop")]
     internal static extern void iox2_node_drop(IntPtr node_handle);
 
     /// <summary>
     /// Waits for the specified cycle time to pass.
     /// Returns IOX2_OK on successful wait, or an error code if interrupted or termination was requested.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_wait")]
     internal static extern int iox2_node_wait(
         ref IntPtr node_handle,
         ulong cycle_time_sec,
         uint cycle_time_nsec);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_service_builder")]
     internal static extern IntPtr iox2_node_service_builder(
         ref IntPtr node_handle,  // Pass by reference - C expects pointer to handle
         IntPtr service_builder_struct_ptr,  // Changed to IntPtr to allow passing NULL
@@ -666,7 +666,7 @@ internal static partial class Iox2NativeMethods
     // Service Discovery API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_list")]
     internal static extern int iox2_service_list(
         iox2_service_type_e service_type,
         IntPtr config_ptr,  // iox2_config_ptr - can be null
@@ -677,44 +677,44 @@ internal static partial class Iox2NativeMethods
     // Node Name API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_name_new")]
     internal static extern int iox2_node_name_new(
         IntPtr node_name_struct,  // Changed to IntPtr to allow passing NULL
         [MarshalAs(UnmanagedType.LPUTF8Str)] string node_name_str,
         int node_name_len,
         out IntPtr node_name_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_node_name_drop")]
     internal static extern void iox2_node_name_drop(IntPtr node_name_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_cast_node_name_ptr")]
     internal static extern IntPtr iox2_cast_node_name_ptr(IntPtr node_name_handle);
 
     // ========================================
     // Service Name API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_name_new")]
     internal static extern int iox2_service_name_new(
         IntPtr service_name_struct,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string service_name_str,
         int service_name_len,
         out IntPtr service_name_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_name_drop")]
     internal static extern void iox2_service_name_drop(IntPtr service_name_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_cast_service_name_ptr")]
     internal static extern IntPtr iox2_cast_service_name_ptr(IntPtr service_name_handle);
 
     // ========================================
     // Service Builder Pub/Sub API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub")]
     internal static extern IntPtr iox2_service_builder_pub_sub(IntPtr service_builder_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub_set_payload_type_details")]
     internal static extern int iox2_service_builder_pub_sub_set_payload_type_details(
         ref IntPtr service_builder_pub_sub_handle,  // Pass by reference - C expects pointer to handle
         iox2_type_variant_e type_variant,
@@ -724,37 +724,37 @@ internal static partial class Iox2NativeMethods
         ulong type_alignment);
 
     // QoS Settings for Publish-Subscribe Service Builder
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub_set_max_subscribers")]
     internal static extern void iox2_service_builder_pub_sub_set_max_subscribers(
         ref IntPtr service_builder_pub_sub_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub_set_max_publishers")]
     internal static extern void iox2_service_builder_pub_sub_set_max_publishers(
         ref IntPtr service_builder_pub_sub_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub_set_subscriber_max_buffer_size")]
     internal static extern void iox2_service_builder_pub_sub_set_subscriber_max_buffer_size(
         ref IntPtr service_builder_pub_sub_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub_set_subscriber_max_borrowed_samples")]
     internal static extern void iox2_service_builder_pub_sub_set_subscriber_max_borrowed_samples(
         ref IntPtr service_builder_pub_sub_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub_set_history_size")]
     internal static extern void iox2_service_builder_pub_sub_set_history_size(
         ref IntPtr service_builder_pub_sub_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub_set_enable_safe_overflow")]
     internal static extern void iox2_service_builder_pub_sub_set_enable_safe_overflow(
         ref IntPtr service_builder_pub_sub_handle,
         [MarshalAs(UnmanagedType.I1)] bool value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_pub_sub_open_or_create")]
     internal static extern int iox2_service_builder_pub_sub_open_or_create(
         IntPtr service_builder_pub_sub_handle,
         IntPtr port_factory_struct_ptr,  // Changed to IntPtr to allow passing NULL
@@ -764,15 +764,15 @@ internal static partial class Iox2NativeMethods
     // Port Factory Pub/Sub API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_pub_sub_drop")]
     internal static extern void iox2_port_factory_pub_sub_drop(IntPtr port_factory_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_pub_sub_publisher_builder")]
     internal static extern IntPtr iox2_port_factory_pub_sub_publisher_builder(
         ref IntPtr port_factory_handle,  // Pass by reference - C expects pointer to handle
         IntPtr publisher_builder_struct_ptr);  // Changed to IntPtr to allow passing NULL
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_pub_sub_subscriber_builder")]
     internal static extern IntPtr iox2_port_factory_pub_sub_subscriber_builder(
         ref IntPtr port_factory_handle,  // Pass by reference - C expects pointer to handle
         IntPtr subscriber_builder_struct_ptr);  // Changed to IntPtr to allow passing NULL
@@ -782,41 +782,41 @@ internal static partial class Iox2NativeMethods
     // ========================================
 
     // QoS Settings for Publisher Builder
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_publisher_builder_set_max_loaned_samples")]
     internal static extern void iox2_port_factory_publisher_builder_set_max_loaned_samples(
         ref IntPtr publisher_builder_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_publisher_builder_set_initial_max_slice_len")]
     internal static extern void iox2_port_factory_publisher_builder_set_initial_max_slice_len(
         ref IntPtr publisher_builder_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_publisher_builder_create")]
     internal static extern int iox2_port_factory_publisher_builder_create(
         IntPtr publisher_builder_handle,
         IntPtr publisher_struct_ptr,  // Changed to IntPtr to allow passing NULL
         out IntPtr publisher_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_publisher_drop")]
     internal static extern void iox2_publisher_drop(IntPtr publisher_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_publisher_update_connections")]
     internal static extern int iox2_publisher_update_connections(ref IntPtr publisher_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_publisher_loan_slice_uninit")]
     internal static extern int iox2_publisher_loan_slice_uninit(
         ref IntPtr publisher_handle,  // Pass by reference - C expects pointer to handle
         IntPtr sample_struct_ptr,  // Changed to IntPtr to allow passing NULL
         out IntPtr sample_handle,
         UIntPtr number_of_elements);  // size_t in C = UIntPtr in C# (8 bytes on 64-bit)
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_sample_mut_send")]
     internal static extern int iox2_sample_mut_send(
         IntPtr sample_handle,
         IntPtr send_error_struct_ptr);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_publisher_send_copy")]
     internal static extern int iox2_publisher_send_copy(
         ref IntPtr publisher_handle,
         IntPtr data_ptr,
@@ -828,21 +828,21 @@ internal static partial class Iox2NativeMethods
     // ========================================
 
     // Subscriber Builder QoS
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_subscriber_builder_set_buffer_size")]
     internal static extern void iox2_port_factory_subscriber_builder_set_buffer_size(
         ref IntPtr subscriber_builder_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_subscriber_builder_create")]
     internal static extern int iox2_port_factory_subscriber_builder_create(
         IntPtr subscriber_builder_handle,
         IntPtr subscriber_struct_ptr,  // Changed to IntPtr to allow passing NULL
         out IntPtr subscriber_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_subscriber_drop")]
     internal static extern void iox2_subscriber_drop(IntPtr subscriber_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_subscriber_receive")]
     internal static extern int iox2_subscriber_receive(
         ref IntPtr subscriber_handle,  // Pass by reference - C expects pointer to handle
         IntPtr sample_struct_ptr,  // Changed to IntPtr to allow passing NULL
@@ -852,71 +852,71 @@ internal static partial class Iox2NativeMethods
     // Sample API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_sample_drop")]
     internal static extern void iox2_sample_drop(IntPtr sample_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_sample_payload")]
     internal static extern void iox2_sample_payload(
         ref IntPtr sample_handle,  // Non-owning reference (_ref type) - needs ref to pass pointer-to-pointer
         out IntPtr payload_ptr,
         out UIntPtr payload_len);  // c_size_t in C = UIntPtr in C#
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_sample_mut_payload_mut")]
     internal static extern void iox2_sample_mut_payload_mut(
         ref IntPtr sample_handle,  // Non-owning reference (_ref type) - needs ref to pass pointer-to-pointer
         out IntPtr payload_ptr,
         out UIntPtr payload_len);  // c_size_t in C = UIntPtr in C#
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_sample_mut_payload_mut")]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_sample_mut_payload_mut")]
     internal static extern void iox2_sample_mut_payload_mut_ptr(
         ref IntPtr sample_handle,
         out IntPtr payload_ptr,
         IntPtr payload_len_or_null);  // Can pass IntPtr.Zero for NULL
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_sample_mut_drop")]
     internal static extern void iox2_sample_mut_drop(IntPtr sample_handle);
 
     // ========================================
     // Service Builder Event API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_event")]
     internal static extern IntPtr iox2_service_builder_event(IntPtr service_builder_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_event_open_or_create")]
     internal static extern int iox2_service_builder_event_open_or_create(
         IntPtr service_builder_event_handle,
         IntPtr port_factory_struct_ptr,  // Changed to IntPtr to allow passing NULL
         out IntPtr port_factory_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_event_open")]
     internal static extern int iox2_service_builder_event_open(
         IntPtr service_builder_event_handle,
         IntPtr port_factory_struct_ptr,
         out IntPtr port_factory_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_event_create")]
     internal static extern int iox2_service_builder_event_create(
         IntPtr service_builder_event_handle,
         IntPtr port_factory_struct_ptr,
         out IntPtr port_factory_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_event_set_max_notifiers")]
     internal static extern void iox2_service_builder_event_set_max_notifiers(
         ref IntPtr service_builder_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_event_set_max_listeners")]
     internal static extern void iox2_service_builder_event_set_max_listeners(
         ref IntPtr service_builder_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_event_set_max_nodes")]
     internal static extern void iox2_service_builder_event_set_max_nodes(
         ref IntPtr service_builder_handle,
         UIntPtr value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_event_set_event_id_max_value")]
     internal static extern void iox2_service_builder_event_set_event_id_max_value(
         ref IntPtr service_builder_handle,
         UIntPtr value);
@@ -925,15 +925,15 @@ internal static partial class Iox2NativeMethods
     // Port Factory Event API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_event_drop")]
     internal static extern void iox2_port_factory_event_drop(IntPtr port_factory_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_event_notifier_builder")]
     internal static extern IntPtr iox2_port_factory_event_notifier_builder(
         ref IntPtr port_factory_handle,  // Pass by reference - C expects pointer to handle
         IntPtr notifier_builder_struct_ptr);  // Changed to IntPtr to allow passing NULL
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_event_listener_builder")]
     internal static extern IntPtr iox2_port_factory_event_listener_builder(
         ref IntPtr port_factory_handle,  // Pass by reference - C expects pointer to handle
         IntPtr listener_builder_struct_ptr);  // Changed to IntPtr to allow passing NULL
@@ -942,12 +942,12 @@ internal static partial class Iox2NativeMethods
     // Notifier Builder API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_notifier_builder_set_default_event_id")]
     internal static extern void iox2_port_factory_notifier_builder_set_default_event_id(
         ref IntPtr notifier_builder_handle,
         ref iox2_event_id_t event_id);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_notifier_builder_create")]
     internal static extern int iox2_port_factory_notifier_builder_create(
         IntPtr notifier_builder_handle,
         IntPtr notifier_struct_ptr,  // Changed to IntPtr to allow passing NULL
@@ -957,15 +957,15 @@ internal static partial class Iox2NativeMethods
     // Notifier API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_notifier_drop")]
     internal static extern void iox2_notifier_drop(IntPtr notifier_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_notifier_notify")]
     internal static extern int iox2_notifier_notify(
         ref IntPtr notifier_handle,  // Pass by reference - C expects pointer to handle
         IntPtr number_of_notified_listeners_ptr);  // Can be NULL
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_notifier_notify_with_custom_event_id")]
     internal static extern int iox2_notifier_notify_with_custom_event_id(
         ref IntPtr notifier_handle,
         ref iox2_event_id_t custom_event_id,
@@ -975,7 +975,7 @@ internal static partial class Iox2NativeMethods
     // Listener Builder API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_listener_builder_create")]
     internal static extern int iox2_port_factory_listener_builder_create(
         IntPtr listener_builder_handle,
         IntPtr listener_struct_ptr,  // Changed to IntPtr to allow passing NULL
@@ -985,16 +985,16 @@ internal static partial class Iox2NativeMethods
     // Listener API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_drop")]
     internal static extern void iox2_listener_drop(IntPtr listener_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_try_wait_one")]
     internal static extern int iox2_listener_try_wait_one(
         ref IntPtr listener_handle,
         out iox2_event_id_t event_id,
         out bool has_received_one);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_timed_wait_one")]
     internal static extern int iox2_listener_timed_wait_one(
         ref IntPtr listener_handle,
         out iox2_event_id_t event_id,
@@ -1002,7 +1002,7 @@ internal static partial class Iox2NativeMethods
         ulong seconds,
         uint nanoseconds);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_blocking_wait_one")]
     internal static extern int iox2_listener_blocking_wait_one(
         ref IntPtr listener_handle,
         out iox2_event_id_t event_id,
@@ -1012,10 +1012,10 @@ internal static partial class Iox2NativeMethods
     // Service Builder Request Response API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_request_response")]
     internal static extern IntPtr iox2_service_builder_request_response(IntPtr service_builder_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_request_response_set_request_payload_type_details")]
     internal static extern int iox2_service_builder_request_response_set_request_payload_type_details(
         ref IntPtr service_builder_handle,
         iox2_type_variant_e type_variant,
@@ -1024,7 +1024,7 @@ internal static partial class Iox2NativeMethods
         ulong type_size,
         ulong type_alignment);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_request_response_set_response_payload_type_details")]
     internal static extern int iox2_service_builder_request_response_set_response_payload_type_details(
         ref IntPtr service_builder_handle,
         iox2_type_variant_e type_variant,
@@ -1033,19 +1033,19 @@ internal static partial class Iox2NativeMethods
         ulong type_size,
         ulong type_alignment);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_request_response_open_or_create")]
     internal static extern int iox2_service_builder_request_response_open_or_create(
         IntPtr service_builder_handle,
         IntPtr port_factory_struct_ptr,
         out IntPtr port_factory_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_request_response_open")]
     internal static extern int iox2_service_builder_request_response_open(
         IntPtr service_builder_handle,
         IntPtr port_factory_struct_ptr,
         out IntPtr port_factory_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_request_response_create")]
     internal static extern int iox2_service_builder_request_response_create(
         IntPtr service_builder_handle,
         IntPtr port_factory_struct_ptr,
@@ -1055,15 +1055,15 @@ internal static partial class Iox2NativeMethods
     // Port Factory Request Response API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_request_response_drop")]
     internal static extern void iox2_port_factory_request_response_drop(IntPtr port_factory_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_request_response_client_builder")]
     internal static extern IntPtr iox2_port_factory_request_response_client_builder(
         ref IntPtr port_factory_handle,
         IntPtr client_builder_struct_ptr);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_request_response_server_builder")]
     internal static extern IntPtr iox2_port_factory_request_response_server_builder(
         ref IntPtr port_factory_handle,
         IntPtr server_builder_struct_ptr);
@@ -1072,7 +1072,7 @@ internal static partial class Iox2NativeMethods
     // Client Builder API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_client_builder_create")]
     internal static extern int iox2_port_factory_client_builder_create(
         IntPtr client_builder_handle,
         IntPtr client_struct_ptr,
@@ -1082,23 +1082,23 @@ internal static partial class Iox2NativeMethods
     // Client API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_client_drop")]
     internal static extern void iox2_client_drop(IntPtr client_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_client_loan_slice_uninit")]
     internal static extern int iox2_client_loan_slice_uninit(
         ref IntPtr client_handle,
         IntPtr request_struct_ptr,
         out IntPtr request_handle,
         UIntPtr number_of_elements);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_request_mut_send")]
     internal static extern int iox2_request_mut_send(
         IntPtr request_handle,
         IntPtr pending_response_struct_ptr,
         out IntPtr pending_response_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_client_send_copy")]
     internal static extern int iox2_client_send_copy(
         ref IntPtr client_handle,
         IntPtr data_ptr,
@@ -1111,7 +1111,7 @@ internal static partial class Iox2NativeMethods
     // Server Builder API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_server_builder_create")]
     internal static extern int iox2_port_factory_server_builder_create(
         IntPtr server_builder_handle,
         IntPtr server_struct_ptr,
@@ -1121,10 +1121,10 @@ internal static partial class Iox2NativeMethods
     // Server API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_server_drop")]
     internal static extern void iox2_server_drop(IntPtr server_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_server_receive")]
     internal static extern int iox2_server_receive(
         ref IntPtr server_handle,
         IntPtr active_request_struct_ptr,
@@ -1134,126 +1134,209 @@ internal static partial class Iox2NativeMethods
     // ActiveRequest API (server-side request)
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_active_request_drop")]
     internal static extern void iox2_active_request_drop(IntPtr active_request_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_active_request_payload")]
     internal static extern void iox2_active_request_payload(
         ref IntPtr active_request_handle,
         out IntPtr payload_ptr,
         out UIntPtr payload_len);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_active_request_loan_slice_uninit")]
     internal static extern int iox2_active_request_loan_slice_uninit(
         ref IntPtr active_request_handle,
         IntPtr response_struct_ptr,
         out IntPtr response_handle,
         UIntPtr number_of_elements);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_active_request_send_copy")]
     internal static extern int iox2_active_request_send_copy(
         ref IntPtr active_request_handle,
         IntPtr data_ptr,
         UIntPtr data_len,
         UIntPtr number_of_elements);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_request_mut_payload_mut")]
     internal static extern void iox2_request_mut_payload_mut(
         ref IntPtr request_handle,
         out IntPtr payload_ptr,
         out UIntPtr payload_len);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_request_mut_drop")]
     internal static extern void iox2_request_mut_drop(IntPtr request_handle);
 
     // ========================================
     // Response API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_response_drop")]
     internal static extern void iox2_response_drop(IntPtr response_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_response_payload")]
     internal static extern void iox2_response_payload(
         ref IntPtr response_handle,
         out IntPtr payload_ptr,
         out UIntPtr payload_len);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_response_mut_payload_mut")]
     internal static extern void iox2_response_mut_payload_mut(
         ref IntPtr response_handle,
         out IntPtr payload_ptr,
         out UIntPtr payload_len);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_response_mut_send")]
     internal static extern int iox2_response_mut_send(IntPtr response_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_response_mut_drop")]
     internal static extern void iox2_response_mut_drop(IntPtr response_handle);
 
     // ========================================
     // Pending Response API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_pending_response_drop")]
     internal static extern void iox2_pending_response_drop(IntPtr pending_response_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_pending_response_receive")]
     internal static extern int iox2_pending_response_receive(
         ref IntPtr pending_response_handle,
         IntPtr response_struct_ptr,
         out IntPtr response_handle);
 
     // ========================================
+    // Panic containment API (fork-only, see api/guarded.rs in the submodule)
+    // ========================================
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate void iox2_panic_callback(IntPtr message);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_guarded_set_panic_callback(iox2_panic_callback? callback);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_create_error_string")]
+    internal static extern IntPtr iox2_listener_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_notifier_create_error_string")]
+    internal static extern IntPtr iox2_notifier_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_event_open_or_create_error_string")]
+    internal static extern IntPtr iox2_event_open_or_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_pub_sub_open_or_create_error_string")]
+    internal static extern IntPtr iox2_pub_sub_open_or_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_request_response_open_or_create_error_string")]
+    internal static extern IntPtr iox2_request_response_open_or_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_blackboard_create_error_string")]
+    internal static extern IntPtr iox2_blackboard_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_blackboard_open_error_string")]
+    internal static extern IntPtr iox2_blackboard_open_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_publisher_create_error_string")]
+    internal static extern IntPtr iox2_publisher_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_subscriber_create_error_string")]
+    internal static extern IntPtr iox2_subscriber_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_client_create_error_string")]
+    internal static extern IntPtr iox2_client_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_server_create_error_string")]
+    internal static extern IntPtr iox2_server_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_reader_create_error_string")]
+    internal static extern IntPtr iox2_reader_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_writer_create_error_string")]
+    internal static extern IntPtr iox2_writer_create_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_loan_error_string")]
+    internal static extern IntPtr iox2_loan_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_send_error_string")]
+    internal static extern IntPtr iox2_send_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_request_send_error_string")]
+    internal static extern IntPtr iox2_request_send_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_receive_error_string")]
+    internal static extern IntPtr iox2_receive_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_notifier_notify_error_string")]
+    internal static extern IntPtr iox2_notifier_notify_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_wait_error_string")]
+    internal static extern IntPtr iox2_listener_wait_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_list_error_string")]
+    internal static extern IntPtr iox2_service_list_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_semantic_string_error_string")]
+    internal static extern IntPtr iox2_semantic_string_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_handle_error_string")]
+    internal static extern IntPtr iox2_entry_handle_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_handle_mut_error_string")]
+    internal static extern IntPtr iox2_entry_handle_mut_error_string(int error);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [return: MarshalAs(UnmanagedType.U1)]
+    internal static extern bool iox2_guarded_take_last_panic(byte[] buffer, UIntPtr buffer_len);
+
+    // ========================================
     // Config API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_global_config")]
     internal static extern IntPtr iox2_config_global_config();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_default")]
     internal static extern int iox2_config_default(
         IntPtr config_struct_ptr,
         out IntPtr config_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_from_file")]
     internal static extern int iox2_config_from_file(
         IntPtr config_struct_ptr,
         out IntPtr config_handle,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string config_file);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_setup_global_config_from_file")]
     internal static extern int iox2_config_setup_global_config_from_file(
         out IntPtr config_ptr,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string config_file);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_from_ptr")]
     internal static extern void iox2_config_from_ptr(
         IntPtr config_ptr,
         IntPtr config_struct_ptr,
         out IntPtr config_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_clone")]
     internal static extern void iox2_config_clone(
         ref IntPtr config_handle,
         IntPtr config_struct_ptr,
         out IntPtr cloned_config_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_drop")]
     internal static extern void iox2_config_drop(IntPtr config_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_global_root_path")]
     internal static extern IntPtr iox2_config_global_root_path(ref IntPtr config_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_global_set_root_path")]
     internal static extern int iox2_config_global_set_root_path(
         ref IntPtr config_handle,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string value);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_global_prefix")]
     internal static extern IntPtr iox2_config_global_prefix(ref IntPtr config_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_config_global_set_prefix")]
     internal static extern int iox2_config_global_set_prefix(
         ref IntPtr config_handle,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string value);
@@ -1265,22 +1348,23 @@ internal static partial class Iox2NativeMethods
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate void iox2_log_callback(iox2_log_level_e log_level, IntPtr origin, IntPtr message);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_log")]
     internal static extern void iox2_log(iox2_log_level_e log_level, IntPtr origin, IntPtr message);
 
     // Note: iox2_use_console_logger() was removed in iceoryx2 v0.8.0 - console logger is now the default
     // Note: iox2_use_file_logger() was removed in iceoryx2 v0.8.0 - requires rebuild with --features iceoryx2-loggers/file
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_set_log_level_from_env_or_default")]
     internal static extern void iox2_set_log_level_from_env_or_default();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_set_log_level")]
     internal static extern void iox2_set_log_level(iox2_log_level_e level);
 
+    // Returns an enum by value: no safe panic sentinel exists, so it stays unguarded.
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern iox2_log_level_e iox2_get_log_level();
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_set_logger")]
     [return: MarshalAs(UnmanagedType.U1)]
     internal static extern bool iox2_set_logger(iox2_log_callback logger);
 
@@ -1342,22 +1426,22 @@ internal static partial class Iox2NativeMethods
     // WaitSetBuilder API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_builder_new")]
     internal static extern void iox2_waitset_builder_new(
         IntPtr struct_ptr,
         out IntPtr handle_ptr);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_builder_drop")]
     internal static extern void iox2_waitset_builder_drop(IntPtr handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_builder_create")]
     internal static extern int iox2_waitset_builder_create(
         IntPtr builder_handle,
         iox2_service_type_e service_type,
         IntPtr struct_ptr,
         out IntPtr waitset_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_builder_set_signal_handling_mode")]
     internal static extern void iox2_waitset_builder_set_signal_handling_mode(
         ref IntPtr builder_handle_ref,
         iox2_signal_handling_mode_e mode);
@@ -1366,30 +1450,31 @@ internal static partial class Iox2NativeMethods
     // WaitSet API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_drop")]
     internal static extern void iox2_waitset_drop(IntPtr handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_is_empty")]
     [return: MarshalAs(UnmanagedType.U1)]
     internal static extern bool iox2_waitset_is_empty(ref IntPtr handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_len")]
     internal static extern UIntPtr iox2_waitset_len(ref IntPtr handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_capacity")]
     internal static extern UIntPtr iox2_waitset_capacity(ref IntPtr handle);
 
+    // Returns an enum by value: no safe panic sentinel exists, so it stays unguarded.
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern iox2_signal_handling_mode_e iox2_waitset_signal_handling_mode(ref IntPtr handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attach_notification")]
     internal static extern int iox2_waitset_attach_notification(
         ref IntPtr waitset_handle,
         IntPtr file_descriptor,
         IntPtr guard_struct_ptr,
         out IntPtr guard_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attach_deadline")]
     internal static extern int iox2_waitset_attach_deadline(
         ref IntPtr waitset_handle,
         IntPtr file_descriptor,
@@ -1398,7 +1483,7 @@ internal static partial class Iox2NativeMethods
         IntPtr guard_struct_ptr,
         out IntPtr guard_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attach_interval")]
     internal static extern int iox2_waitset_attach_interval(
         ref IntPtr waitset_handle,
         ulong seconds,
@@ -1406,21 +1491,21 @@ internal static partial class Iox2NativeMethods
         IntPtr guard_struct_ptr,
         out IntPtr guard_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_wait_and_process")]
     internal static extern int iox2_waitset_wait_and_process(
         ref IntPtr waitset_handle,
         iox2_waitset_run_callback callback,
         IntPtr callback_context,
         out iox2_waitset_run_result_e result);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_wait_and_process_once")]
     internal static extern int iox2_waitset_wait_and_process_once(
         ref IntPtr waitset_handle,
         iox2_waitset_run_callback callback,
         IntPtr callback_context,
         out iox2_waitset_run_result_e result);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_wait_and_process_once_with_timeout")]
     internal static extern int iox2_waitset_wait_and_process_once_with_timeout(
         ref IntPtr waitset_handle,
         iox2_waitset_run_callback callback,
@@ -1429,61 +1514,61 @@ internal static partial class Iox2NativeMethods
         uint nanoseconds,
         out iox2_waitset_run_result_e result);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_stop")]
     internal static extern void iox2_waitset_stop(ref IntPtr waitset_handle);
 
     // ========================================
     // WaitSetGuard API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_guard_drop")]
     internal static extern void iox2_waitset_guard_drop(IntPtr handle);
 
     // ========================================
     // WaitSetAttachmentId API
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attachment_id_drop")]
     internal static extern void iox2_waitset_attachment_id_drop(IntPtr handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attachment_id_equal")]
     [return: MarshalAs(UnmanagedType.U1)]
     internal static extern bool iox2_waitset_attachment_id_equal(
         ref IntPtr lhs,
         ref IntPtr rhs);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attachment_id_less")]
     [return: MarshalAs(UnmanagedType.U1)]
     internal static extern bool iox2_waitset_attachment_id_less(
         ref IntPtr lhs,
         ref IntPtr rhs);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attachment_id_has_event_from")]
     [return: MarshalAs(UnmanagedType.U1)]
     internal static extern bool iox2_waitset_attachment_id_has_event_from(
         ref IntPtr attachment_id_handle,
         ref IntPtr guard_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attachment_id_has_missed_deadline")]
     [return: MarshalAs(UnmanagedType.U1)]
     internal static extern bool iox2_waitset_attachment_id_has_missed_deadline(
         ref IntPtr attachment_id_handle,
         ref IntPtr guard_handle);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_create_error_string")]
     internal static extern IntPtr iox2_waitset_create_error_string(iox2_waitset_create_error_e error);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_attachment_error_string")]
     internal static extern IntPtr iox2_waitset_attachment_error_string(iox2_waitset_attachment_error_e error);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_waitset_run_error_string")]
     internal static extern IntPtr iox2_waitset_run_error_string(iox2_waitset_run_error_e error);
 
     // ========================================
     // FileDescriptor API (needed for WaitSet attachments)
     // ========================================
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_listener_get_file_descriptor")]
     internal static extern IntPtr iox2_listener_get_file_descriptor(ref IntPtr listener_handle);
 
     // ========================================
@@ -1493,19 +1578,19 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Creates a blackboard creator service builder from a generic service builder.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_creator")]
     internal static extern IntPtr iox2_service_builder_blackboard_creator(IntPtr service_builder_handle);
 
     /// <summary>
     /// Creates a blackboard opener service builder from a generic service builder.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_opener")]
     internal static extern IntPtr iox2_service_builder_blackboard_opener(IntPtr service_builder_handle);
 
     /// <summary>
     /// Sets the key type details for the blackboard creator.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_creator_set_key_type_details")]
     internal static extern int iox2_service_builder_blackboard_creator_set_key_type_details(
         ref IntPtr service_builder_handle,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string type_name,
@@ -1516,7 +1601,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Sets the key type details for the blackboard opener.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_opener_set_key_type_details")]
     internal static extern int iox2_service_builder_blackboard_opener_set_key_type_details(
         ref IntPtr service_builder_handle,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string type_name,
@@ -1534,7 +1619,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Sets the key equality comparison function for the blackboard creator.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_creator_set_key_eq_comparison_function")]
     internal static extern void iox2_service_builder_blackboard_creator_set_key_eq_comparison_function(
         ref IntPtr service_builder_handle,
         iox2_service_blackboard_key_eq_cmp_func key_eq_func);
@@ -1548,7 +1633,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Adds a key-value entry to the blackboard creator.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_creator_add")]
     internal static extern void iox2_service_builder_blackboard_creator_add(
         ref IntPtr service_builder_handle,
         IntPtr key_ptr,
@@ -1562,7 +1647,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Sets the maximum number of readers for the blackboard creator.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_creator_set_max_readers")]
     internal static extern void iox2_service_builder_blackboard_creator_set_max_readers(
         ref IntPtr service_builder_handle,
         UIntPtr value);
@@ -1570,7 +1655,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Sets the maximum number of readers for the blackboard opener.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_opener_set_max_readers")]
     internal static extern void iox2_service_builder_blackboard_opener_set_max_readers(
         ref IntPtr service_builder_handle,
         UIntPtr value);
@@ -1578,7 +1663,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Sets the maximum number of nodes for the blackboard creator.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_creator_set_max_nodes")]
     internal static extern void iox2_service_builder_blackboard_creator_set_max_nodes(
         ref IntPtr service_builder_handle,
         UIntPtr value);
@@ -1586,7 +1671,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Sets the maximum number of nodes for the blackboard opener.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_opener_set_max_nodes")]
     internal static extern void iox2_service_builder_blackboard_opener_set_max_nodes(
         ref IntPtr service_builder_handle,
         UIntPtr value);
@@ -1594,7 +1679,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Opens an existing blackboard service.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_open")]
     internal static extern int iox2_service_builder_blackboard_open(
         IntPtr service_builder_handle,
         IntPtr port_factory_struct_ptr,
@@ -1603,7 +1688,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Creates a new blackboard service.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_service_builder_blackboard_create")]
     internal static extern int iox2_service_builder_blackboard_create(
         IntPtr service_builder_handle,
         IntPtr port_factory_struct_ptr,
@@ -1616,13 +1701,13 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Drops the blackboard port factory handle.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_blackboard_drop")]
     internal static extern void iox2_port_factory_blackboard_drop(IntPtr port_factory_handle);
 
     /// <summary>
     /// Creates a writer builder from the blackboard port factory.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_blackboard_writer_builder")]
     internal static extern IntPtr iox2_port_factory_blackboard_writer_builder(
         ref IntPtr port_factory_handle,
         IntPtr writer_builder_struct_ptr);
@@ -1630,7 +1715,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Creates a reader builder from the blackboard port factory.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_blackboard_reader_builder")]
     internal static extern IntPtr iox2_port_factory_blackboard_reader_builder(
         ref IntPtr port_factory_handle,
         IntPtr reader_builder_struct_ptr);
@@ -1642,7 +1727,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Creates a writer from the writer builder.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_writer_builder_create")]
     internal static extern int iox2_port_factory_writer_builder_create(
         IntPtr writer_builder_handle,
         IntPtr writer_struct_ptr,
@@ -1655,13 +1740,13 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Drops the writer handle.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_writer_drop")]
     internal static extern void iox2_writer_drop(IntPtr writer_handle);
 
     /// <summary>
     /// Gets a mutable entry handle for a key from the writer.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_writer_entry")]
     internal static extern int iox2_writer_entry(
         ref IntPtr writer_handle,
         IntPtr entry_handle_struct_ptr,
@@ -1679,13 +1764,13 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Drops the mutable entry handle.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_handle_mut_drop")]
     internal static extern void iox2_entry_handle_mut_drop(IntPtr entry_handle_mut);
 
     /// <summary>
     /// Updates the entry value by copying data.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_handle_mut_update_with_copy")]
     internal static extern void iox2_entry_handle_mut_update_with_copy(
         ref IntPtr entry_handle_mut,
         IntPtr value_ptr,
@@ -1695,7 +1780,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Loans an uninitialized entry value for writing.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_handle_mut_loan_uninit")]
     internal static extern void iox2_entry_handle_mut_loan_uninit(
         IntPtr entry_handle_mut,
         IntPtr entry_value_struct_ptr,
@@ -1710,7 +1795,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Gets a mutable pointer to the entry value uninit's payload.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_value_uninit_value_mut")]
     internal static extern void iox2_entry_value_uninit_value_mut(
         ref IntPtr entry_value_handle,
         out IntPtr payload_ptr);
@@ -1718,7 +1803,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Updates the entry with the loaned value.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_value_uninit_update")]
     internal static extern void iox2_entry_value_uninit_update(
         IntPtr entry_value_handle,
         IntPtr entry_handle_struct_ptr,
@@ -1727,7 +1812,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Drops the entry value uninit handle without updating.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_value_uninit_drop")]
     internal static extern void iox2_entry_value_uninit_drop(IntPtr entry_value_handle);
 
     // ========================================
@@ -1737,7 +1822,7 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Creates a reader from the reader builder.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_port_factory_reader_builder_create")]
     internal static extern int iox2_port_factory_reader_builder_create(
         IntPtr reader_builder_handle,
         IntPtr reader_struct_ptr,
@@ -1750,13 +1835,13 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Drops the reader handle.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_reader_drop")]
     internal static extern void iox2_reader_drop(IntPtr reader_handle);
 
     /// <summary>
     /// Gets an entry handle for a key from the reader.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_reader_entry")]
     internal static extern int iox2_reader_entry(
         ref IntPtr reader_handle,
         IntPtr entry_handle_struct_ptr,
@@ -1774,13 +1859,13 @@ internal static partial class Iox2NativeMethods
     /// <summary>
     /// Drops the entry handle.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_handle_drop")]
     internal static extern void iox2_entry_handle_drop(IntPtr entry_handle);
 
     /// <summary>
     /// Gets the current value from the entry handle.
     /// </summary>
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "iox2_guarded_entry_handle_get")]
     internal static extern void iox2_entry_handle_get(
         ref IntPtr entry_handle,
         IntPtr value_ptr,

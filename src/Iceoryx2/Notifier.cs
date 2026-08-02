@@ -13,6 +13,8 @@
 using Iceoryx2.SafeHandles;
 using System;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -48,7 +50,7 @@ public sealed class Notifier : IDisposable
                 IntPtr.Zero);  // Pass NULL for listener count
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<Unit, Iox2Error>.Err(Iox2Error.NotifyFailed);
+                return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.NotifyFailed, result, Native.Iox2NativeMethods.iox2_notifier_notify_error_string));
 
             return Result<Unit, Iox2Error>.Ok(Unit.Value);
         }

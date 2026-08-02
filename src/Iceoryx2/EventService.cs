@@ -10,6 +10,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+using Iceoryx2.ErrorHandling;
 using Iceoryx2.SafeHandles;
 using System;
 
@@ -65,7 +66,9 @@ public sealed class EventService : IDisposable
                 out var notifierHandle);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK || notifierHandle == IntPtr.Zero)
-                return Result<Notifier, Iox2Error>.Err(Iox2Error.NotifierCreationFailed);
+                return Result<Notifier, Iox2Error>.Err(Iox2Error.FromNative(
+                    Iox2ErrorKind.NotifierCreationFailed, result,
+                    Native.Iox2NativeMethods.iox2_notifier_create_error_string));
 
             var handle = new SafeNotifierHandle(notifierHandle);
             var notifier = new Notifier(handle);
@@ -104,7 +107,9 @@ public sealed class EventService : IDisposable
                 out var listenerHandle);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK || listenerHandle == IntPtr.Zero)
-                return Result<Listener, Iox2Error>.Err(Iox2Error.ListenerCreationFailed);
+                return Result<Listener, Iox2Error>.Err(Iox2Error.FromNative(
+                    Iox2ErrorKind.ListenerCreationFailed, result,
+                    Native.Iox2NativeMethods.iox2_listener_create_error_string));
 
             var handle = new SafeListenerHandle(listenerHandle);
             var listener = new Listener(handle);

@@ -14,6 +14,8 @@ using Iceoryx2.SafeHandles;
 using System;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.Blackboard;
 
 /// <summary>
@@ -61,7 +63,7 @@ public sealed class BlackboardService<TKey> : IDisposable
 
         if (result != IOX2_OK)
         {
-            return Result<Writer<TKey>, Iox2Error>.Err(Iox2Error.WriterCreationFailed);
+            return Result<Writer<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WriterCreationFailed, result, iox2_writer_create_error_string));
         }
 
         return Result<Writer<TKey>, Iox2Error>.Ok(new Writer<TKey>(writerHandle, _keyComparer));
@@ -93,7 +95,7 @@ public sealed class BlackboardService<TKey> : IDisposable
 
         if (result != IOX2_OK)
         {
-            return Result<Reader<TKey>, Iox2Error>.Err(Iox2Error.ReaderCreationFailed);
+            return Result<Reader<TKey>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ReaderCreationFailed, result, iox2_reader_create_error_string));
         }
 
         return Result<Reader<TKey>, Iox2Error>.Ok(new Reader<TKey>(readerHandle, _keyComparer));

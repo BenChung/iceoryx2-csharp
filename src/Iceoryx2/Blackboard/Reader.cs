@@ -15,6 +15,8 @@ using System;
 using System.Runtime.InteropServices;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.Blackboard;
 
 /// <summary>
@@ -72,7 +74,7 @@ public sealed class Reader<TKey> : IDisposable
 
         if (result != IOX2_OK || entryHandlePtr == IntPtr.Zero)
         {
-            return Result<EntryHandle<TKey, TValue>, Iox2Error>.Err(Iox2Error.EntryAccessFailed);
+            return Result<EntryHandle<TKey, TValue>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.EntryAccessFailed, result, Native.Iox2NativeMethods.iox2_entry_handle_error_string));
         }
 
         return Result<EntryHandle<TKey, TValue>, Iox2Error>.Ok(

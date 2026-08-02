@@ -17,6 +17,8 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -162,7 +164,7 @@ public sealed class WaitSet : IDisposable
 
         if (result != Native.Iox2NativeMethods.IOX2_OK)
         {
-            return Result<WaitSetGuard, Iox2Error>.Err(Iox2Error.WaitSetAttachmentFailed);
+            return Result<WaitSetGuard, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitSetAttachmentFailed, result, code => Native.Iox2NativeMethods.iox2_waitset_attachment_error_string((Native.Iox2NativeMethods.iox2_waitset_attachment_error_e)code)));
         }
 
         return Result<WaitSetGuard, Iox2Error>.Ok(new WaitSetGuard(new SafeWaitSetGuardHandle(guardHandle)));
@@ -204,7 +206,7 @@ public sealed class WaitSet : IDisposable
 
         if (result != Native.Iox2NativeMethods.IOX2_OK)
         {
-            return Result<WaitSetGuard, Iox2Error>.Err(Iox2Error.WaitSetAttachmentFailed);
+            return Result<WaitSetGuard, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitSetAttachmentFailed, result, code => Native.Iox2NativeMethods.iox2_waitset_attachment_error_string((Native.Iox2NativeMethods.iox2_waitset_attachment_error_e)code)));
         }
 
         return Result<WaitSetGuard, Iox2Error>.Ok(new WaitSetGuard(new SafeWaitSetGuardHandle(guardHandle)));
@@ -233,7 +235,7 @@ public sealed class WaitSet : IDisposable
 
         if (result != Native.Iox2NativeMethods.IOX2_OK)
         {
-            return Result<WaitSetGuard, Iox2Error>.Err(Iox2Error.WaitSetAttachmentFailed);
+            return Result<WaitSetGuard, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitSetAttachmentFailed, result, code => Native.Iox2NativeMethods.iox2_waitset_attachment_error_string((Native.Iox2NativeMethods.iox2_waitset_attachment_error_e)code)));
         }
 
         return Result<WaitSetGuard, Iox2Error>.Ok(new WaitSetGuard(new SafeWaitSetGuardHandle(guardHandle)));
@@ -282,7 +284,7 @@ public sealed class WaitSet : IDisposable
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
             {
-                return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.WaitSetRunFailed);
+                return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitSetRunFailed, result, code => Native.Iox2NativeMethods.iox2_waitset_run_error_string((Native.Iox2NativeMethods.iox2_waitset_run_error_e)code)));
             }
 
             return Result<WaitSetRunResult, Iox2Error>.Ok((WaitSetRunResult)runResult);
@@ -327,7 +329,7 @@ public sealed class WaitSet : IDisposable
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
             {
-                return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.WaitSetRunFailed);
+                return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitSetRunFailed, result, code => Native.Iox2NativeMethods.iox2_waitset_run_error_string((Native.Iox2NativeMethods.iox2_waitset_run_error_e)code)));
             }
 
             return Result<WaitSetRunResult, Iox2Error>.Ok((WaitSetRunResult)runResult);
@@ -518,7 +520,7 @@ public sealed class WaitSet : IDisposable
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
             {
-                return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.WaitSetRunFailed);
+                return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitSetRunFailed, result, code => Native.Iox2NativeMethods.iox2_waitset_run_error_string((Native.Iox2NativeMethods.iox2_waitset_run_error_e)code)));
             }
 
             return Result<WaitSetRunResult, Iox2Error>.Ok((WaitSetRunResult)runResult);

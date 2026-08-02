@@ -13,6 +13,8 @@
 using Iceoryx2.SafeHandles;
 using System;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -94,7 +96,7 @@ public sealed class WaitSetBuilder : IDisposable
 
         if (result != Native.Iox2NativeMethods.IOX2_OK)
         {
-            return Result<WaitSet, Iox2Error>.Err(Iox2Error.WaitSetCreationFailed);
+            return Result<WaitSet, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitSetCreationFailed, result, code => Native.Iox2NativeMethods.iox2_waitset_create_error_string((Native.Iox2NativeMethods.iox2_waitset_create_error_e)code)));
         }
 
         return Result<WaitSet, Iox2Error>.Ok(new WaitSet(new SafeWaitSetHandle(waitsetHandle)));

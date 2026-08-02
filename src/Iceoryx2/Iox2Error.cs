@@ -11,6 +11,8 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 using Iceoryx2.ErrorHandling;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Iceoryx2;
 
@@ -77,9 +79,42 @@ public abstract class Iox2Error
             Iox2ErrorKind.ReaderCreationFailed => new ReaderCreationError(details),
             Iox2ErrorKind.EntryAccessFailed => new EntryAccessError(details),
             Iox2ErrorKind.ConfigCreationFailed => new ConfigCreationError(details),
+            Iox2ErrorKind.NativePanic => new NativePanicError(details),
             Iox2ErrorKind.Unknown => new UnknownError(details),
             _ => new UnknownError(details)
         };
+    }
+
+    /// <summary>
+    /// Creates the error for a failed native call: a <see cref="NativePanicError"/>
+    /// when a caught panic caused the failure, otherwise an error of
+    /// <paramref name="kind"/> carrying the native error code and its
+    /// human-readable name from the given *_error_string function.
+    /// </summary>
+    internal static Iox2Error FromNative(Iox2ErrorKind kind, int code, Func<int, IntPtr> errorString)
+    {
+        var panic = Iox2Runtime.TakeLastPanic();
+        if (panic != null)
+            return new NativePanicError(panic);
+
+        // Error enums start at 1; other values must not reach the native
+        // enum-typed error_string functions.
+        var reason = code > 0 ? Marshal.PtrToStringUTF8(errorString(code)) : null;
+        return FromKind(kind, reason != null ? $"error {code}: {reason}" : $"error {code}");
+    }
+
+    /// <summary>
+    /// Creates the error for a failed native call whose error enum has no
+    /// *_error_string function: a <see cref="NativePanicError"/> when a caught
+    /// panic caused the failure, otherwise an error of <paramref name="kind"/>
+    /// carrying the native error code.
+    /// </summary>
+    internal static Iox2Error FromNative(Iox2ErrorKind kind, int code)
+    {
+        var panic = Iox2Runtime.TakeLastPanic();
+        if (panic != null)
+            return new NativePanicError(panic);
+        return FromKind(kind, $"error {code}");
     }
 
     // Backward compatibility: Static error instances

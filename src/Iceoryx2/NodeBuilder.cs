@@ -57,6 +57,7 @@ public sealed class NodeBuilder
     /// </summary>
     public Result<Node, Iox2Error> Create()
     {
+        Iox2Runtime.EnablePanicReporting();
         try
         {
             lock (Native.Iox2NativeMethods.NodeLifetimeLock)
@@ -100,7 +101,8 @@ public sealed class NodeBuilder
                     out var nodeHandle);
 
                 if (createResult != Native.Iox2NativeMethods.IOX2_OK || nodeHandle == IntPtr.Zero)
-                    return Result<Node, Iox2Error>.Err(Iox2Error.NodeCreationFailed);
+                    return Result<Node, Iox2Error>.Err(
+                        Iox2Error.FromNative(ErrorHandling.Iox2ErrorKind.NodeCreationFailed, createResult));
 
                 var handle = new SafeNodeHandle(nodeHandle);
                 var node = new Node(handle, serviceType);

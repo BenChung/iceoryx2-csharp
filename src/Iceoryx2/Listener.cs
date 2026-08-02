@@ -15,6 +15,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -51,7 +53,7 @@ public sealed class Listener : IDisposable
                 out var hasReceivedOne);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<EventId?, Iox2Error>.Err(Iox2Error.WaitFailed);
+                return Result<EventId?, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitFailed, result, Native.Iox2NativeMethods.iox2_listener_wait_error_string));
 
             if (!hasReceivedOne)
                 return Result<EventId?, Iox2Error>.Ok(null);
@@ -91,7 +93,7 @@ public sealed class Listener : IDisposable
                 nanoseconds);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<EventId?, Iox2Error>.Err(Iox2Error.WaitFailed);
+                return Result<EventId?, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitFailed, result, Native.Iox2NativeMethods.iox2_listener_wait_error_string));
 
             if (!hasReceivedOne)
                 return Result<EventId?, Iox2Error>.Ok(null);
@@ -167,7 +169,7 @@ public sealed class Listener : IDisposable
                 out var hasReceivedOne);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<EventId, Iox2Error>.Err(Iox2Error.WaitFailed);
+                return Result<EventId, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.WaitFailed, result, Native.Iox2NativeMethods.iox2_listener_wait_error_string));
 
             // Blocking wait should always receive an event or return an error
             if (!hasReceivedOne)

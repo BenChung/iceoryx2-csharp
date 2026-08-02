@@ -14,6 +14,8 @@ using Iceoryx2.SafeHandles;
 using System;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.RequestResponse;
 
 /// <summary>
@@ -59,7 +61,7 @@ public sealed class RequestResponseService<TRequest, TResponse> : IDisposable
 
         if (result != IOX2_OK)
         {
-            return Result<Client<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.ClientCreationFailed);
+            return Result<Client<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ClientCreationFailed, result, iox2_client_create_error_string));
         }
 
         return Result<Client<TRequest, TResponse>, Iox2Error>.Ok(new Client<TRequest, TResponse>(clientHandle));
@@ -90,7 +92,7 @@ public sealed class RequestResponseService<TRequest, TResponse> : IDisposable
 
         if (result != IOX2_OK)
         {
-            return Result<Server<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.ServerCreationFailed);
+            return Result<Server<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServerCreationFailed, result, iox2_server_create_error_string));
         }
 
         return Result<Server<TRequest, TResponse>, Iox2Error>.Ok(new Server<TRequest, TResponse>(serverHandle));

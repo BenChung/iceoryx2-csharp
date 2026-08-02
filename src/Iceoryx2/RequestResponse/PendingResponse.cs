@@ -16,6 +16,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.RequestResponse;
 
 /// <summary>
@@ -60,7 +62,7 @@ public sealed class PendingResponse<TResponse> : IDisposable
 
             if (result != IOX2_OK)
             {
-                return Result<Response<TResponse>?, Iox2Error>.Err(Iox2Error.ResponseReceiveFailed);
+                return Result<Response<TResponse>?, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ResponseReceiveFailed, result, iox2_receive_error_string));
             }
 
             if (responseHandle == IntPtr.Zero)

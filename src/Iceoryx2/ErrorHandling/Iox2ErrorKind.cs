@@ -79,6 +79,8 @@ namespace Iceoryx2.ErrorHandling
         EntryAccessFailed,
         /// <summary>Config creation failed.</summary>
         ConfigCreationFailed,
+        /// <summary>The native library caught an internal panic.</summary>
+        NativePanic,
         /// <summary>Unknown error.</summary>
         Unknown
     }

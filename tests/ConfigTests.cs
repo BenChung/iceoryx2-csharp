@@ -165,6 +165,59 @@ namespace Iceoryx2.Tests
         }
 
         [Fact]
+        public void OverlongDomainPaths_SurfaceAsNativePanicInsteadOfCrash()
+        {
+            // ipcRoot + domain combine into paths beyond iceoryx2's 255-char
+            // limit, which is a fatal_panic in the native library. Containment
+            // must surface it as an error and keep the process alive.
+            var ipcRoot = Path.Combine(Path.GetTempPath(), new string('a', 60));
+            var domain = new string('d', 80);
+            using var config = Config.ForDomain(ipcRoot, domain).Unwrap();
+
+            string? reported = null;
+            Action<string> handler = message => reported = message;
+            Iox2Runtime.NativePanic += handler;
+            try
+            {
+                var result = NodeBuilder.New().WithConfig(config).Create();
+                if (result.IsOk)
+                {
+                    using var node = result.Unwrap();
+                    var service = node.ServiceBuilder()
+                        .PublishSubscribe<TestPayload>()
+                        .Open("panic_probe");
+                    Assert.True(service.IsErr);
+                }
+                else
+                {
+                    Assert.True(result.IsErr);
+                }
+            }
+            finally
+            {
+                Iox2Runtime.NativePanic -= handler;
+            }
+
+            Assert.NotNull(reported);
+            Assert.Contains("path length", reported);
+        }
+
+        [Fact]
+        public void ServiceErrors_CarryNativeReason()
+        {
+            var ipcRoot = UniqueIpcRoot();
+            using var config = Config.ForDomain(ipcRoot, "errdetail").Unwrap();
+            using var node = NodeBuilder.New().WithConfig(config).Create().Unwrap();
+            using var first = node.ServiceBuilder().Event().Create("dup_event").Unwrap();
+
+            var second = node.ServiceBuilder().Event().Create("dup_event");
+
+            Assert.True(second.IsErr);
+            var message = second.Match(ok => "", err => err.Message);
+            Assert.Contains("Exists", message);
+        }
+
+        [Fact]
         public void WithConfig_ServicesLiveUnderDomainRoot()
         {
             var ipcRoot = UniqueIpcRoot();

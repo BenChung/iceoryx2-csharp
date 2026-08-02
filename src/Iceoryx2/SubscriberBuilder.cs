@@ -13,6 +13,8 @@
 using Iceoryx2.SafeHandles;
 using System;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -72,7 +74,7 @@ public sealed class SubscriberBuilder
                 out var subscriberHandle);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK || subscriberHandle == IntPtr.Zero)
-                return Result<Subscriber, Iox2Error>.Err(Iox2Error.SubscriberCreationFailed);
+                return Result<Subscriber, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SubscriberCreationFailed, result, Native.Iox2NativeMethods.iox2_subscriber_create_error_string));
 
             var handle = new SafeSubscriberHandle(subscriberHandle);
             var subscriber = new Subscriber(handle);

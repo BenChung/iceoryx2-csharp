@@ -13,6 +13,8 @@
 using Iceoryx2.SafeHandles;
 using System;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -136,7 +138,7 @@ public sealed class PublishSubscribeServiceBuilder<T> where T : unmanaged
                 out var serviceNameHandle);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<Service, Iox2Error>.Err(Iox2Error.ServiceCreationFailed);
+                return Result<Service, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServiceCreationFailed, result, Native.Iox2NativeMethods.iox2_semantic_string_error_string));
 
             // Get service name ptr for builder
             var serviceNamePtr = Native.Iox2NativeMethods.iox2_cast_service_name_ptr(serviceNameHandle);
@@ -235,7 +237,7 @@ public sealed class PublishSubscribeServiceBuilder<T> where T : unmanaged
                     typeAlignment);
 
                 if (typeResult != Native.Iox2NativeMethods.IOX2_OK)
-                    return Result<Service, Iox2Error>.Err(Iox2Error.ServiceCreationFailed);
+                    return Result<Service, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServiceCreationFailed, typeResult));
             }
 
             // Open or create the service - pass NULL to let C allocate on heap
@@ -245,7 +247,7 @@ public sealed class PublishSubscribeServiceBuilder<T> where T : unmanaged
                 out var portFactoryHandle);
 
             if (openResult != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<Service, Iox2Error>.Err(Iox2Error.ServiceCreationFailed);
+                return Result<Service, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ServiceCreationFailed, openResult, Native.Iox2NativeMethods.iox2_pub_sub_open_or_create_error_string));
 
             if (portFactoryHandle == IntPtr.Zero)
                 return Result<Service, Iox2Error>.Err(Iox2Error.ServiceCreationFailed);

@@ -13,6 +13,8 @@
 using Iceoryx2.SafeHandles;
 using System;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -91,7 +93,7 @@ public sealed class PublisherBuilder
                 out var publisherHandle);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK || publisherHandle == IntPtr.Zero)
-                return Result<Publisher, Iox2Error>.Err(Iox2Error.PublisherCreationFailed);
+                return Result<Publisher, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.PublisherCreationFailed, result, Native.Iox2NativeMethods.iox2_publisher_create_error_string));
 
             var handle = new SafePublisherHandle(publisherHandle);
             var publisher = new Publisher(handle);

@@ -13,6 +13,8 @@
 using System;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.RequestResponse;
 
 /// <summary>
@@ -69,7 +71,7 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
 
         if (serviceNameResult != IOX2_OK)
         {
-            return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.RequestResponseServiceCreationFailed);
+            return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestResponseServiceCreationFailed, serviceNameResult, iox2_semantic_string_error_string));
         }
 
         try
@@ -111,7 +113,7 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
 
             if (requestResult != IOX2_OK)
             {
-                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.RequestResponseServiceCreationFailed);
+                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestResponseServiceCreationFailed, requestResult));
             }
 
             // Set response payload type details
@@ -129,7 +131,7 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
 
             if (responseResult != IOX2_OK)
             {
-                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.RequestResponseServiceCreationFailed);
+                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestResponseServiceCreationFailed, responseResult));
             }
 
             // Open or create the service
@@ -140,7 +142,7 @@ public sealed class RequestResponseServiceBuilder<TRequest, TResponse>
 
             if (result != IOX2_OK)
             {
-                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.RequestResponseServiceCreationFailed);
+                return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestResponseServiceCreationFailed, result, iox2_request_response_open_or_create_error_string));
             }
 
             return Result<RequestResponseService<TRequest, TResponse>, Iox2Error>.Ok(

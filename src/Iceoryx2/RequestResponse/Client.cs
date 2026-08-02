@@ -15,6 +15,8 @@ using System;
 using System.Runtime.InteropServices;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2.RequestResponse;
 
 /// <summary>
@@ -52,7 +54,7 @@ public sealed class Client<TRequest, TResponse> : IDisposable
 
         if (result != IOX2_OK)
         {
-            return Result<RequestMut<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.RequestLoanFailed);
+            return Result<RequestMut<TRequest, TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestLoanFailed, result, iox2_loan_error_string));
         }
 
         return Result<RequestMut<TRequest, TResponse>, Iox2Error>.Ok(new RequestMut<TRequest, TResponse>(requestHandle));
@@ -79,7 +81,7 @@ public sealed class Client<TRequest, TResponse> : IDisposable
 
         if (result != IOX2_OK)
         {
-            return Result<PendingResponse<TResponse>, Iox2Error>.Err(Iox2Error.RequestSendFailed);
+            return Result<PendingResponse<TResponse>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.RequestSendFailed, result, iox2_request_send_error_string));
         }
 
         return Result<PendingResponse<TResponse>, Iox2Error>.Ok(new PendingResponse<TResponse>(pendingResponseHandle));

@@ -14,6 +14,8 @@ using Iceoryx2.SafeHandles;
 using System;
 using System.Runtime.InteropServices;
 
+using Iceoryx2.ErrorHandling;
+
 namespace Iceoryx2;
 
 /// <summary>
@@ -54,7 +56,7 @@ public sealed class Publisher : IDisposable
                 (UIntPtr)1);  // size_t in C = UIntPtr in C#
 
             if (result != Native.Iox2NativeMethods.IOX2_OK || sampleHandle == IntPtr.Zero)
-                return Result<Sample<T>, Iox2Error>.Err(Iox2Error.SampleLoanFailed);
+                return Result<Sample<T>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SampleLoanFailed, result, Native.Iox2NativeMethods.iox2_loan_error_string));
 
             var handle = new SafeSampleHandle(sampleHandle, isMutable: true);
             var sample = new Sample<T>(handle, numberOfElements: 1);
@@ -90,7 +92,7 @@ public sealed class Publisher : IDisposable
                 (UIntPtr)numberOfElements);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK || sampleHandle == IntPtr.Zero)
-                return Result<Sample<T>, Iox2Error>.Err(Iox2Error.SampleLoanFailed);
+                return Result<Sample<T>, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SampleLoanFailed, result, Native.Iox2NativeMethods.iox2_loan_error_string));
 
             var handle = new SafeSampleHandle(sampleHandle, isMutable: true);
             var sample = new Sample<T>(handle, numberOfElements: (int)numberOfElements);
@@ -126,7 +128,7 @@ public sealed class Publisher : IDisposable
                     IntPtr.Zero);
 
                 if (result != Native.Iox2NativeMethods.IOX2_OK)
-                    return Result<Unit, Iox2Error>.Err(Iox2Error.SendFailed);
+                    return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.SendFailed, result, Native.Iox2NativeMethods.iox2_send_error_string));
 
                 return Result<Unit, Iox2Error>.Ok(Unit.Value);
             }
@@ -300,7 +302,7 @@ public sealed class Publisher : IDisposable
             var result = Native.Iox2NativeMethods.iox2_publisher_update_connections(ref publisherHandle);
 
             if (result != Native.Iox2NativeMethods.IOX2_OK)
-                return Result<Unit, Iox2Error>.Err(Iox2Error.ConnectionUpdateFailed);
+                return Result<Unit, Iox2Error>.Err(Iox2Error.FromNative(Iox2ErrorKind.ConnectionUpdateFailed, result));
 
             return Result<Unit, Iox2Error>.Ok(Unit.Value);
         }
