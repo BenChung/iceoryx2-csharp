@@ -118,17 +118,64 @@ namespace Iceoryx2.Tests
         }
 
         [Fact]
+        public void ForDomain_RelativeIpcRoot_Throws()
+        {
+            Assert.Throws<ArgumentException>(() => Config.ForDomain("relative\\path", "dom"));
+        }
+
+        [Fact]
+        public void WipeDomain_RemovesDomainStateAndPlatformMarkers()
+        {
+            var ipcRoot = UniqueIpcRoot();
+            var domain = "wipetest_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+            using (var config = Config.ForDomain(ipcRoot, domain).Unwrap())
+            {
+                using var node = NodeBuilder.New()
+                    .Name("wipe_test_node")
+                    .WithConfig(config)
+                    .Create()
+                    .Unwrap();
+                using var service = node.ServiceBuilder()
+                    .PublishSubscribe<TestPayload>()
+                    .Open("wipe_test_service")
+                    .Unwrap();
+                using var publisher = service.PublisherBuilder().Create().Unwrap();
+            }
+
+            // Native cleanup also runs on the finalizer thread for any test
+            // object left undisposed; drain it so no cleanup scan races the
+            // wipe below (a scan hitting vanishing files aborts the process).
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            // A leftover marker as a crashed process would leave it.
+            var platformTmp = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? @"C:\ProgramData\iceoryx2\tmp\"
+                : "/tmp/";
+            var plantedMarker = Path.Combine(platformTmp, $"iox2_{domain}_leftover.shm_state");
+            Directory.CreateDirectory(platformTmp);
+            File.WriteAllText(plantedMarker, "");
+
+            var clean = Config.WipeDomain(ipcRoot, domain);
+
+            Assert.True(clean);
+            Assert.False(Directory.Exists(Path.Combine(ipcRoot, domain)));
+            Assert.False(File.Exists(plantedMarker));
+        }
+
+        [Fact]
         public void WithConfig_ServicesLiveUnderDomainRoot()
         {
             var ipcRoot = UniqueIpcRoot();
             using var config = Config.ForDomain(ipcRoot, "cfgtest").Unwrap();
 
-            var node = NodeBuilder.New()
+            using var node = NodeBuilder.New()
                 .Name("config_test_node")
                 .WithConfig(config)
                 .Create()
                 .Unwrap();
-            var service = node.ServiceBuilder()
+            using var service = node.ServiceBuilder()
                 .PublishSubscribe<TestPayload>()
                 .Open("config_test_service")
                 .Unwrap();

@@ -35,6 +35,8 @@ public sealed class Config : IDisposable
     // configured root path, and does not create them.
     private const string WindowsPlatformTempDirectory = @"C:\ProgramData\iceoryx2\tmp\";
     private const string WindowsPlatformShmDirectory = @"C:\ProgramData\iceoryx2\shm\";
+    private const string PosixPlatformTempDirectory = "/tmp/";
+    private const string PosixPlatformShmDirectory = "/dev/shm/";
 
     private readonly SafeConfigHandle _handle;
 
@@ -136,6 +138,8 @@ public sealed class Config : IDisposable
     {
         if (string.IsNullOrEmpty(ipcRoot))
             throw new ArgumentException("ipcRoot must be a non-empty path", nameof(ipcRoot));
+        if (!System.IO.Path.IsPathRooted(ipcRoot))
+            throw new ArgumentException("ipcRoot must be an absolute path", nameof(ipcRoot));
         if (string.IsNullOrEmpty(domain))
             throw new ArgumentException("domain must be a non-empty name", nameof(domain));
 
@@ -163,6 +167,52 @@ public sealed class Config : IDisposable
             throw;
         }
         return Result<Config, Iox2Error>.Ok(config);
+    }
+
+    /// <summary>
+    /// Removes every on-disk trace of a domain: the domain directory under
+    /// <paramref name="ipcRoot"/> and the domain-prefixed shared-memory marker
+    /// files in the platform state directories. Call it only after all domain
+    /// participants have exited or been disposed; a file still held open by a
+    /// live process is skipped.
+    /// </summary>
+    /// <returns><c>true</c> when nothing of the domain remains on disk.</returns>
+    public static bool WipeDomain(string ipcRoot, string domain)
+    {
+        if (string.IsNullOrEmpty(ipcRoot))
+            throw new ArgumentException("ipcRoot must be a non-empty path", nameof(ipcRoot));
+        if (!System.IO.Path.IsPathRooted(ipcRoot))
+            throw new ArgumentException("ipcRoot must be an absolute path", nameof(ipcRoot));
+        if (string.IsNullOrEmpty(domain))
+            throw new ArgumentException("domain must be a non-empty name", nameof(domain));
+
+        var clean = true;
+        var root = System.IO.Path.Combine(ipcRoot, domain);
+        if (Directory.Exists(root))
+        {
+            // Delete file by file so one locked file doesn't abort the sweep.
+            foreach (var file in Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories))
+            {
+                try { File.Delete(file); } catch { clean = false; }
+            }
+            try { Directory.Delete(root, recursive: true); } catch { clean = false; }
+        }
+
+        var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        var platformDirs = isWindows
+            ? new[] { WindowsPlatformTempDirectory, WindowsPlatformShmDirectory }
+            : new[] { PosixPlatformTempDirectory, PosixPlatformShmDirectory };
+        var prefix = $"iox2_{domain}_";
+        foreach (var dir in platformDirs)
+        {
+            if (!Directory.Exists(dir))
+                continue;
+            foreach (var file in Directory.EnumerateFiles(dir, prefix + "*"))
+            {
+                try { File.Delete(file); } catch { clean = false; }
+            }
+        }
+        return clean;
     }
 
     /// <summary>
