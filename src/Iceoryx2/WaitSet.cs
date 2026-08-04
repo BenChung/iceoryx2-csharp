@@ -46,9 +46,17 @@ public sealed class WaitSet : IDisposable
             }
         };
 
-    private sealed record WaitSetRunContext(
-        Func<WaitSetAttachmentId, CallbackProgression> Callback,
-        bool DisposeAttachments);
+    private sealed class WaitSetRunContext
+    {
+        public WaitSetRunContext(Func<WaitSetAttachmentId, CallbackProgression> callback, bool disposeAttachments)
+        {
+            Callback = callback;
+            DisposeAttachments = disposeAttachments;
+        }
+
+        public Func<WaitSetAttachmentId, CallbackProgression> Callback { get; }
+        public bool DisposeAttachments { get; }
+    }
 
     private static readonly Native.Iox2NativeMethods.iox2_waitset_run_callback s_runCallbackTrampoline =
         (attachmentIdHandle, contextPtr) =>
