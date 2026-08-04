@@ -135,7 +135,7 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
         if (payloadPtr == IntPtr.Zero)
             throw new InvalidOperationException("Failed to get sample payload");
 
-        return ref System.Runtime.CompilerServices.Unsafe.AsRef<T>(payloadPtr.ToPointer());
+        return ref *(T*)payloadPtr.ToPointer();
     }
 
     /// <summary>
@@ -168,7 +168,7 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
         if (payloadPtr == IntPtr.Zero)
             throw new InvalidOperationException("Failed to get sample payload");
 
-        return ref System.Runtime.CompilerServices.Unsafe.AsRef<T>(payloadPtr.ToPointer());
+        return ref *(T*)payloadPtr.ToPointer();
     }
 
     /// <summary>
